@@ -166,7 +166,7 @@ class SubmissionController extends Controller
 
         // Update submission task
         $submissionTask->update([
-            'proof_text' => $validated['proof_text'],
+            'proof_text' => $validated['proof_text'] ?? null,
             'proof_files' => $proofFiles,
             'status' => 'completed',
             'completed_at' => now(),
@@ -206,8 +206,8 @@ class SubmissionController extends Controller
         $submission->update([
             'completed_at' => now(),
             'status' => 'completed',
-            'employee_signature' => $validated['employee_signature'],
-            'notes' => $validated['notes'],
+            'employee_signature' => $validated['employee_signature'] ?? null,
+            'notes' => $validated['notes'] ?? null,
         ]);
 
         return redirect()->route('employee.dashboard')
