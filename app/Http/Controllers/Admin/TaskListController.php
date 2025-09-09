@@ -168,11 +168,16 @@ class TaskListController extends Controller
     /**
      * View all submissions
      */
-    public function submissions()
+    public function submissions(Request $request)
     {
-        $submissions = Submission::with(['user', 'taskList'])
-            ->latest()
-            ->paginate(20);
+        $query = Submission::with(['user', 'taskList']);
+
+        // Filter by status if provided
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $submissions = $query->latest()->paginate(20);
 
         return view('admin.submissions.index', compact('submissions'));
     }

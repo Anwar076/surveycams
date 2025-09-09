@@ -15,12 +15,21 @@ class SubmissionController extends Controller
     /**
      * Display available task lists for the employee
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         
         // Get assigned lists
         $assignedLists = $this->getAssignedLists($user);
+        
+        // Apply filters
+        if ($request->filled('priority')) {
+            $assignedLists = $assignedLists->where('priority', $request->priority);
+        }
+        
+        if ($request->filled('category')) {
+            $assignedLists = $assignedLists->where('category', $request->category);
+        }
         
         return view('employee.lists.index', compact('assignedLists'));
     }
