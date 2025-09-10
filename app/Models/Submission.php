@@ -17,6 +17,8 @@ class Submission extends Model
         'status',
         'employee_signature',
         'manager_signature',
+        'digital_signature',
+        'signature_date',
         'notes',
         'metadata',
     ];
@@ -26,6 +28,7 @@ class Submission extends Model
         return [
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
+            'signature_date' => 'datetime',
             'metadata' => 'json',
         ];
     }
@@ -75,5 +78,34 @@ class Submission extends Model
         
         $completedTasks = $this->submissionTasks()->where('status', 'completed')->count();
         return round(($completedTasks / $totalTasks) * 100);
+    }
+
+    public function requiresSignature()
+    {
+        return $this->taskList->requires_signature || 
+               $this->taskList->tasks()->where('requires_signature', true)->exists();
+    }
+
+    public function hasDigitalSignature()
+    {
+        return !empty($this->digital_signature);
+    }
+
+    public function addDigitalSignature($signatureData)
+    {
+        $this->update([
+            'digital_signature' => $signatureData,
+            'signature_date' => now(),
+        ]);
+    }
+
+    public function hasRejectedTasks()
+    {
+        return $this->submissionTasks()->where('status', 'rejected')->exists();
+    }
+
+    public function getRejectedTasksAttribute()
+    {
+        return $this->submissionTasks()->where('status', 'rejected')->with('task')->get();
     }
 }

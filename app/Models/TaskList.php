@@ -16,6 +16,7 @@ class TaskList extends Model
         'description',
         'created_by',
         'parent_list_id',
+        'weekday',
         'schedule_type',
         'schedule_config',
         'priority',
@@ -84,5 +85,70 @@ class TaskList extends Model
     public function scopeByPriority($query, $priority)
     {
         return $query->where('priority', $priority);
+    }
+
+    public function scopeMainLists($query)
+    {
+        return $query->whereNull('parent_list_id');
+    }
+
+    public function scopeDailySubLists($query)
+    {
+        return $query->whereNotNull('parent_list_id')->whereNotNull('weekday');
+    }
+
+    public function scopeForWeekday($query, $weekday)
+    {
+        return $query->where('weekday', strtolower($weekday));
+    }
+
+    public function scopeForToday($query)
+    {
+        $today = strtolower(now()->format('l')); // 'monday', 'tuesday', etc.
+        return $query->where('weekday', $today);
+    }
+
+    // Helper methods
+    public function isMainList()
+    {
+        return is_null($this->parent_list_id);
+    }
+
+    public function isDailySubList()
+    {
+        return !is_null($this->parent_list_id) && !is_null($this->weekday);
+    }
+
+    public function getTodaySubList()
+    {
+        if (!$this->isMainList()) {
+            return null;
+        }
+
+        $today = strtolower(now()->format('l'));
+        return $this->subLists()->where('weekday', $today)->first();
+    }
+
+    public function createDailySubLists()
+    {
+        $weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        
+        foreach ($weekdays as $weekday) {
+            $existingSubList = $this->subLists()->where('weekday', $weekday)->first();
+            
+            if (!$existingSubList) {
+                $this->subLists()->create([
+                    'title' => $this->title . ' – ' . ucfirst($weekday),
+                    'description' => $this->description,
+                    'weekday' => $weekday,
+                    'schedule_type' => 'daily',
+                    'priority' => $this->priority,
+                    'category' => $this->category,
+                    'requires_signature' => $this->requires_signature,
+                    'is_active' => true,
+                    'created_by' => $this->created_by,
+                ]);
+            }
+        }
     }
 }

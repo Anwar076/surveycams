@@ -34,6 +34,12 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/submissions', [TaskListController::class, 'submissions'])->name('submissions.index');
     Route::get('/submissions/{submission}', [TaskListController::class, 'showSubmission'])->name('submissions.show');
     Route::post('/submissions/{submission}/review', [TaskListController::class, 'reviewSubmission'])->name('submissions.review');
+    Route::post('/submission-tasks/{submissionTask}/reject', [TaskListController::class, 'rejectTask'])->name('submission-tasks.reject');
+    Route::post('/submission-tasks/{submissionTask}/redo', [TaskListController::class, 'requestRedo'])->name('submission-tasks.redo');
+    
+    // Weekly overview and daily sub-lists
+    Route::get('/weekly-overview', [TaskListController::class, 'weeklyOverview'])->name('weekly-overview');
+    Route::post('/lists/{list}/create-daily-sublists', [TaskListController::class, 'createDailySubLists'])->name('lists.create-daily-sublists');
 });
 
 // Employee Routes
@@ -46,6 +52,12 @@ Route::middleware(['auth', 'verified', 'employee'])->prefix('employee')->name('e
     Route::put('/submissions/{submission}', [SubmissionController::class, 'update'])->name('submissions.update');
     Route::post('/submissions/{submission}/complete', [SubmissionController::class, 'complete'])->name('submissions.complete');
     Route::post('/submissions/{submission}/tasks/{task}', [SubmissionController::class, 'completeTask'])->name('submissions.tasks.complete');
+    
+    // Notification routes
+    Route::get('/notifications', [App\Http\Controllers\Employee\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/mark-read', [App\Http\Controllers\Employee\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [App\Http\Controllers\Employee\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::delete('/notifications/{notification}', [App\Http\Controllers\Employee\NotificationController::class, 'destroy'])->name('notifications.destroy');
 });
 
 Route::middleware('auth')->group(function () {

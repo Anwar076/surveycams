@@ -19,6 +19,7 @@ class Task extends Model
         'order_index',
         'attachments',
         'validation_rules',
+        'requires_signature',
     ];
 
     protected function casts(): array
@@ -27,6 +28,7 @@ class Task extends Model
             'is_required' => 'boolean',
             'attachments' => 'json',
             'validation_rules' => 'json',
+            'requires_signature' => 'boolean',
         ];
     }
 
@@ -39,6 +41,16 @@ class Task extends Model
     public function submissionTasks()
     {
         return $this->hasMany(SubmissionTask::class);
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(TaskAssignment::class);
+    }
+
+    public function assignedUsers()
+    {
+        return $this->belongsToMany(User::class, 'task_assignments')->withPivot('assigned_at', 'due_at', 'is_active')->withTimestamps();
     }
 
     // Scopes
