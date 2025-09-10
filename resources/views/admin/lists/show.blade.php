@@ -22,6 +22,16 @@
                     @if($list->category)
                         <span class="text-sm text-gray-500">{{ $list->category }}</span>
                     @endif
+                    @if($list->isDailySubList())
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            {{ ucfirst($list->weekday) }}
+                        </span>
+                    @endif
+                    @if($list->requires_signature)
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                            Signature Required
+                        </span>
+                    @endif
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                         @if($list->is_active) bg-green-100 text-green-800
                         @else bg-gray-100 text-gray-800 @endif">
@@ -30,6 +40,14 @@
                 </div>
             </div>
             <div class="flex space-x-3">
+                @if($list->isMainList() && $list->subLists->count() === 0)
+                    <form method="POST" action="{{ route('admin.lists.create-daily-sublists', $list) }}" class="inline">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Create Daily Sub-Lists
+                        </button>
+                    </form>
+                @endif
                 <a href="{{ route('admin.lists.edit', $list) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                     Edit List
                 </a>
@@ -65,9 +83,19 @@
                                             Required
                                         </span>
                                     @endif
+                                    @if($task->requires_signature)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                            Signature
+                                        </span>
+                                    @endif
                                     @if($task->required_proof_type !== 'none')
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             {{ ucfirst($task->required_proof_type) }}
+                                        </span>
+                                    @endif
+                                    @if($task->assignments->count() > 0)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            {{ $task->assignments->count() }} assigned
                                         </span>
                                     @endif
                                 </div>

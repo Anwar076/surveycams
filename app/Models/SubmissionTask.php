@@ -14,6 +14,8 @@ class SubmissionTask extends Model
         'task_id',
         'proof_text',
         'proof_files',
+        'digital_signature',
+        'signature_date',
         'status',
         'manager_comment',
         'rejection_reason',
@@ -31,6 +33,7 @@ class SubmissionTask extends Model
             'completed_at' => 'datetime',
             'reviewed_at' => 'datetime',
             'rejected_at' => 'datetime',
+            'signature_date' => 'datetime',
             'redo_requested' => 'boolean',
         ];
     }
