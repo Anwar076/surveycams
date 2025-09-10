@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\ListAssignment;
 use App\Models\Submission;
 use App\Models\SubmissionTask;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -53,11 +54,17 @@ class TaskListController extends Controller
             'requires_signature' => 'boolean',
             'is_template' => 'boolean',
             'is_active' => 'boolean',
+            'create_daily_sublists' => 'boolean',
         ]);
 
         $validated['created_by'] = auth()->id();
 
         $list = TaskList::create($validated);
+
+        // Create daily sub-lists if requested
+        if ($request->has('create_daily_sublists') && $list->isMainList()) {
+            $list->createDailySubLists();
+        }
 
         return redirect()->route('admin.lists.show', $list)
             ->with('success', 'Task list created successfully.');
@@ -103,9 +110,15 @@ class TaskListController extends Controller
             'requires_signature' => 'boolean',
             'is_template' => 'boolean',
             'is_active' => 'boolean',
+            'create_daily_sublists' => 'boolean',
         ]);
 
         $list->update($validated);
+
+        // Create daily sub-lists if requested and this is a main list
+        if ($request->has('create_daily_sublists') && $list->isMainList()) {
+            $list->createDailySubLists();
+        }
 
         return redirect()->route('admin.lists.show', $list)
             ->with('success', 'Task list updated successfully.');
@@ -228,5 +241,75 @@ class TaskListController extends Controller
         ]);
 
         return back()->with('success', 'Submission reviewed successfully.');
+    }
+
+    /**
+     * Reject specific submission task
+     */
+    public function rejectTask(Request $request, SubmissionTask $submissionTask)
+    {
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string|max:1000',
+        ]);
+
+        $submissionTask->reject($validated['rejection_reason'], auth()->id());
+
+        return back()->with('success', 'Task rejected successfully.');
+    }
+
+    /**
+     * Request redo for specific submission task
+     */
+    public function requestRedo(Request $request, SubmissionTask $submissionTask)
+    {
+        $submissionTask->requestRedo(auth()->id());
+
+        return back()->with('success', 'Redo requested successfully.');
+    }
+
+    /**
+     * Get weekly overview for admin dashboard
+     */
+    public function weeklyOverview(Request $request)
+    {
+        $startDate = $request->get('start_date', now()->startOfWeek());
+        $endDate = $request->get('end_date', now()->endOfWeek());
+
+        $employees = User::where('role', 'employee')->where('is_active', true)->get();
+        
+        $overview = [];
+        foreach ($employees as $employee) {
+            $submissions = Submission::where('user_id', $employee->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->with(['taskList', 'submissionTasks'])
+                ->get();
+
+            $overview[$employee->id] = [
+                'employee' => $employee,
+                'total_submissions' => $submissions->count(),
+                'completed' => $submissions->where('status', 'completed')->count(),
+                'in_progress' => $submissions->where('status', 'in_progress')->count(),
+                'rejected' => $submissions->filter(function ($submission) {
+                    return $submission->hasRejectedTasks();
+                })->count(),
+                'submissions' => $submissions,
+            ];
+        }
+
+        return view('admin.weekly-overview', compact('overview', 'startDate', 'endDate'));
+    }
+
+    /**
+     * Create daily sub-lists for a main list
+     */
+    public function createDailySubLists(TaskList $list)
+    {
+        if (!$list->isMainList()) {
+            return back()->with('error', 'Only main lists can have daily sub-lists.');
+        }
+
+        $list->createDailySubLists();
+
+        return back()->with('success', 'Daily sub-lists created successfully.');
     }
 }

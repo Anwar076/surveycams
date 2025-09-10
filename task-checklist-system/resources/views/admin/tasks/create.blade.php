@@ -84,6 +84,29 @@
                         Required task (must be completed before submission)
                     </label>
                 </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" name="requires_signature" id="requires_signature" value="1" {{ old('requires_signature') ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="requires_signature" class="ml-2 block text-sm text-gray-900">
+                        Requires digital signature for completion
+                    </label>
+                </div>
+            </div>
+
+            <!-- Task Assignment -->
+            <div>
+                <label for="assigned_users" class="block text-sm font-medium text-gray-700">Assign to Specific Users</label>
+                <select name="assigned_users[]" id="assigned_users" multiple class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}" {{ in_array($user->id, old('assigned_users', [])) ? 'selected' : '' }}>
+                            {{ $user->name }} ({{ $user->email }})
+                        </option>
+                    @endforeach
+                </select>
+                <p class="mt-1 text-sm text-gray-500">Hold Ctrl/Cmd to select multiple users. Leave empty to assign to all employees with list access.</p>
+                @error('assigned_users')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Proof Type Help -->

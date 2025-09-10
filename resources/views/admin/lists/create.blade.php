@@ -125,6 +125,13 @@
                         Active (employees can see and complete this list)
                     </label>
                 </div>
+                
+                <div class="flex items-center" id="daily_sublists_option">
+                    <input type="checkbox" name="create_daily_sublists" id="create_daily_sublists" value="1" {{ old('create_daily_sublists') ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="create_daily_sublists" class="ml-2 block text-sm text-gray-900">
+                        Create daily sub-lists for each day of the week
+                    </label>
+                </div>
             </div>
 
             <!-- Submit -->
@@ -162,4 +169,24 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const parentListSelect = document.getElementById('parent_list_id');
+    const dailySublistsOption = document.getElementById('daily_sublists_option');
+    
+    function toggleDailySublistsOption() {
+        if (parentListSelect.value) {
+            // This is a sub-list, hide the option
+            dailySublistsOption.style.display = 'none';
+        } else {
+            // This is a main list, show the option
+            dailySublistsOption.style.display = 'flex';
+        }
+    }
+    
+    parentListSelect.addEventListener('change', toggleDailySublistsOption);
+    toggleDailySublistsOption(); // Initial check
+});
+</script>
 @endsection

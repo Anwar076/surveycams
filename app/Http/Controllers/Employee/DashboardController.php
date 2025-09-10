@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\TaskList;
 use App\Models\ListAssignment;
 use App\Models\Submission;
+use App\Models\SubmissionTask;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -14,7 +16,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         
-        // Get assigned lists for today
+        // Get assigned lists for today (including daily sub-lists)
         $todaysLists = $this->getAssignedLists($user, today());
         
         // Get recent submissions
@@ -23,6 +25,29 @@ class DashboardController extends Controller
             ->latest()
             ->take(5)
             ->get();
+
+        // Get rejected tasks
+        $rejectedTasks = SubmissionTask::with(['task', 'submission.taskList'])
+            ->whereHas('submission', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->where('status', 'rejected')
+            ->latest()
+            ->take(10)
+            ->get();
+
+        // Get tasks that need to be redone
+        $redoTasks = SubmissionTask::with(['task', 'submission.taskList'])
+            ->whereHas('submission', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->where('redo_requested', true)
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        // Get unread notifications
+        $notifications = $user->unreadNotifications()->latest()->take(5)->get();
 
         // Get statistics
         $stats = [
@@ -36,9 +61,12 @@ class DashboardController extends Controller
             'in_progress' => Submission::where('user_id', $user->id)
                 ->where('status', 'in_progress')
                 ->count(),
+            'rejected_tasks' => $rejectedTasks->count(),
+            'redo_tasks' => $redoTasks->count(),
+            'unread_notifications' => $notifications->count(),
         ];
 
-        return view('employee.dashboard', compact('todaysLists', 'recentSubmissions', 'stats'));
+        return view('employee.dashboard', compact('todaysLists', 'recentSubmissions', 'rejectedTasks', 'redoTasks', 'notifications', 'stats'));
     }
 
     private function getAssignedLists($user, $date)
@@ -76,16 +104,40 @@ class DashboardController extends Controller
             ->merge($roleAssignments->get())
             ->unique('list_id');
 
-        // Filter out lists that already have submissions today
-        $assignedLists = $allAssignments->filter(function ($assignment) use ($user, $date) {
+        // Get today's weekday for daily sub-lists
+        $today = strtolower(now()->format('l')); // 'monday', 'tuesday', etc.
+        $todaysLists = collect();
+
+        foreach ($allAssignments as $assignment) {
+            $taskList = $assignment->taskList;
+            
+            // If this is a main list, check for daily sub-list
+            if ($taskList->isMainList()) {
+                $dailySubList = $taskList->getTodaySubList();
+                if ($dailySubList) {
+                    $taskList = $dailySubList;
+                }
+            }
+            
+            // Check if there's already a submission for this list today
             $existingSubmission = Submission::where('user_id', $user->id)
-                ->where('list_id', $assignment->list_id)
+                ->where('list_id', $taskList->id)
                 ->whereDate('created_at', $date)
                 ->first();
 
-            return !$existingSubmission;
-        });
+            if (!$existingSubmission) {
+                $todaysLists->push($taskList);
+            }
+        }
 
-        return $assignedLists->pluck('taskList');
+        return $todaysLists->unique('id');
+    }
+
+    public function markNotificationAsRead($notificationId)
+    {
+        $notification = auth()->user()->notifications()->findOrFail($notificationId);
+        $notification->markAsRead();
+
+        return response()->json(['success' => true]);
     }
 }

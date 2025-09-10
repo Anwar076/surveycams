@@ -85,4 +85,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(SubmissionTask::class, 'reviewed_by');
     }
+
+    public function taskAssignments()
+    {
+        return $this->hasMany(TaskAssignment::class);
+    }
+
+    public function assignedTasks()
+    {
+        return $this->belongsToMany(Task::class, 'task_assignments')->withPivot('assigned_at', 'due_at', 'is_active')->withTimestamps();
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function unreadNotifications()
+    {
+        return $this->hasMany(Notification::class)->whereNull('read_at');
+    }
 }
