@@ -148,6 +148,11 @@ class SubmissionController extends Controller
             $rules['proof_files.*'] = 'image|max:5120'; // 5MB max for images
         }
 
+        // Add digital signature validation if required
+        if ($task->requires_signature) {
+            $rules['digital_signature'] = 'required|string';
+        }
+
         $validated = $request->validate($rules);
 
         // Handle file uploads
@@ -165,12 +170,21 @@ class SubmissionController extends Controller
         }
 
         // Update submission task
-        $submissionTask->update([
+        $updateData = [
             'proof_text' => $validated['proof_text'] ?? null,
             'proof_files' => $proofFiles,
             'status' => 'completed',
             'completed_at' => now(),
-        ]);
+            'redo_requested' => false, // Reset redo flag when task is completed again
+        ];
+
+        // Add digital signature if provided
+        if (isset($validated['digital_signature'])) {
+            $updateData['digital_signature'] = $validated['digital_signature'];
+            $updateData['signature_date'] = now();
+        }
+
+        $submissionTask->update($updateData);
 
         return back()->with('success', 'Task completed successfully!');
     }

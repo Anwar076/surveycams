@@ -42,6 +42,9 @@
                             <a href="{{ route('admin.users.index') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm {{ request()->routeIs('admin.users.*') ? 'border-indigo-500 text-gray-900' : '' }}">
                                 Users
                             </a>
+                            <a href="{{ route('admin.weekly-overview') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm {{ request()->routeIs('admin.weekly-overview') ? 'border-indigo-500 text-gray-900' : '' }}">
+                                Weekly Overview
+                            </a>
                         </div>
                     </div>
 

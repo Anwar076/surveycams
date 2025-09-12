@@ -1,21 +1,153 @@
 @extends('layouts.admin')
 
-@section('title', 'Submission Details')
-
 @section('content')
-<div class="container mx-auto py-6">
-    <h1 class="text-2xl font-bold mb-4">Submission Details</h1>
-    <!-- Example details, replace with actual data -->
-    <div class="bg-white shadow rounded p-6">
-        <p><strong>ID:</strong> {{ $submission->id }}</p>
-        <p><strong>User:</strong> {{ $submission->user->name ?? '-' }}</p>
-        <p><strong>List:</strong> {{ $submission->list->name ?? '-' }}</p>
-        <p><strong>Status:</strong> {{ $submission->status }}</p>
-        <p><strong>Started At:</strong> {{ $submission->started_at }}</p>
-        <p><strong>Completed At:</strong> {{ $submission->completed_at }}</p>
-        <p><strong>Notes:</strong> {{ $submission->notes }}</p>
-        <!-- Add more fields as needed -->
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex justify-between items-start">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Submission Review</h1>
+                <p class="mt-2 text-gray-600">{{ $submission->taskList->title }} by {{ $submission->user->name }}</p>
+                <div class="mt-4 flex items-center space-x-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                        @if($submission->status === 'completed') bg-yellow-100 text-yellow-800
+                        @elseif($submission->status === 'reviewed') bg-green-100 text-green-800
+                        @elseif($submission->status === 'rejected') bg-red-100 text-red-800
+                        @else bg-blue-100 text-blue-800 @endif">
+                        {{ ucfirst($submission->status) }}
+                    </span>
+                    <span class="text-sm text-gray-500">
+                        Started: {{ $submission->started_at ? $submission->started_at->format('M j, Y g:i A') : $submission->created_at->format('M j, Y g:i A') }}
+                    </span>
+                    @if($submission->completed_at)
+                        <span class="text-sm text-gray-500">
+                            Completed: {{ $submission->completed_at->format('M j, Y g:i A') }}
+                        </span>
+                    @endif
+                </div>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{{ route('admin.submissions.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    ← Back to Submissions
+                </a>
+            </div>
+        </div>
     </div>
-    <a href="{{ route('admin.submissions.index') }}" class="mt-4 inline-block text-blue-600 hover:underline">Back to submissions</a>
+
+    <!-- Tasks Review -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Task Review</h3>
+        </div>
+        <div class="divide-y divide-gray-200">
+            @foreach($submission->submissionTasks as $submissionTask)
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3">
+                                <h4 class="text-lg font-medium text-gray-900">{{ $submissionTask->task->title }}</h4>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    @if($submissionTask->status === 'completed') bg-yellow-100 text-yellow-800
+                                    @elseif($submissionTask->status === 'approved') bg-green-100 text-green-800
+                                    @elseif($submissionTask->status === 'rejected') bg-red-100 text-red-800
+                                    @else bg-blue-100 text-blue-800 @endif">
+                                    {{ ucfirst($submissionTask->status) }}
+                                </span>
+                            </div>
+                            
+                            @if($submissionTask->task->description)
+                                <p class="mt-2 text-sm text-gray-600">{{ $submissionTask->task->description }}</p>
+                            @endif
+
+                            <!-- Employee's Proof -->
+                            @if($submissionTask->proof_text || $submissionTask->proof_files)
+                                <div class="mt-4 bg-gray-50 rounded-lg p-4">
+                                    <h5 class="text-sm font-medium text-gray-900 mb-2">Employee's Proof:</h5>
+                                    @if($submissionTask->proof_text)
+                                        <p class="text-sm text-gray-700 mb-2">{{ $submissionTask->proof_text }}</p>
+                                    @endif
+                                    @if($submissionTask->proof_files)
+                                        <div class="space-y-1">
+                                            @foreach($submissionTask->proof_files as $file)
+                                                @php
+                                                    $filename = is_array($file) ? (isset($file['path']) ? basename($file['path']) : '') : basename($file);
+                                                @endphp
+                                                <div class="flex items-center text-sm text-blue-600">
+                                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-5L9 2H4z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    {{ $filename }}
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            <!-- Manager Comment -->
+                            @if($submissionTask->manager_comment || $submissionTask->rejection_reason)
+                                <div class="mt-4 bg-blue-50 rounded-lg p-4">
+                                    <h5 class="text-sm font-medium text-blue-900 mb-2">Manager Review:</h5>
+                                    @if($submissionTask->rejection_reason)
+                                        <div class="bg-red-100 border border-red-200 rounded p-3 mb-2">
+                                            <p class="text-sm font-medium text-red-800">Rejection Reason:</p>
+                                            <p class="text-sm text-red-700">{{ $submissionTask->rejection_reason }}</p>
+                                        </div>
+                                    @endif
+                                    @if($submissionTask->manager_comment)
+                                        <p class="text-sm text-blue-800">{{ $submissionTask->manager_comment }}</p>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Action Buttons -->
+                        @if($submissionTask->status === 'completed')
+                            <div class="ml-6 flex flex-col space-y-2">
+                                <!-- Approve Button -->
+                                <form method="POST" action="{{ route('admin.submissions.review', $submission) }}" class="inline">
+                                    @csrf
+                                    <input type="hidden" name="task_reviews[{{ $submissionTask->task_id }}][status]" value="approved">
+                                    <div class="mb-2">
+                                        <textarea name="task_reviews[{{ $submissionTask->task_id }}][comment]" 
+                                                  placeholder="Optional comment..." 
+                                                  rows="2" 
+                                                  class="w-full text-sm border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"></textarea>
+                                    </div>
+                                    <button type="submit" class="w-full inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                        Approve
+                                    </button>
+                                </form>
+
+                                <!-- Reject Button -->
+                                <form method="POST" action="{{ route('admin.submission-tasks.reject', $submissionTask) }}" class="inline">
+                                    @csrf
+                                    <div class="mb-2">
+                                        <textarea name="rejection_reason" 
+                                                  placeholder="Reason for rejection (required)..." 
+                                                  rows="2" 
+                                                  required
+                                                  class="w-full text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"></textarea>
+                                    </div>
+                                    <button type="submit" class="w-full inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700">
+                                        Reject
+                                    </button>
+                                </form>
+                            </div>
+                        @elseif($submissionTask->status === 'rejected')
+                            <div class="ml-6">
+                                <form method="POST" action="{{ route('admin.submission-tasks.redo', $submissionTask) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700">
+                                        Request Redo
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
 </div>
 @endsection

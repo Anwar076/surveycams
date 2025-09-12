@@ -36,7 +36,28 @@
                             <a href="{{ route('employee.lists.index') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm {{ request()->routeIs('employee.lists.*') ? 'border-indigo-500 text-gray-900' : '' }}">
                                 My Tasks
                             </a>
+                            <a href="{{ route('employee.notifications.index') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm {{ request()->routeIs('employee.notifications.*') ? 'border-indigo-500 text-gray-900' : '' }} relative">
+                                Notifications
+                                @php
+                                    $unreadCount = auth()->user()->unreadNotifications()->count();
+                                @endphp
+                                @if($unreadCount > 0)
+                                    <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                                        {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                                    </span>
+                                @endif
+                            </a>
                         </div>
+                    </div>
+
+                    <!-- Mobile menu button -->
+                    <div class="flex items-center sm:hidden">
+                        <button type="button" class="mobile-menu-button inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                            <span class="sr-only">Open main menu</span>
+                            <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
                     </div>
 
                     <!-- Settings Dropdown -->
@@ -52,6 +73,52 @@
                                 </form>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile menu -->
+            <div class="mobile-menu hidden sm:hidden">
+                <div class="pt-2 pb-3 space-y-1">
+                    <a href="{{ route('employee.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium {{ request()->routeIs('employee.dashboard') ? 'border-indigo-500 text-indigo-700 bg-indigo-50' : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300' }}">
+                        Dashboard
+                    </a>
+                    <a href="{{ route('employee.lists.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium {{ request()->routeIs('employee.lists.*') ? 'border-indigo-500 text-indigo-700 bg-indigo-50' : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300' }}">
+                        My Tasks
+                    </a>
+                    <a href="{{ route('employee.notifications.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium {{ request()->routeIs('employee.notifications.*') ? 'border-indigo-500 text-indigo-700 bg-indigo-50' : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300' }} flex items-center justify-between">
+                        <span>Notifications</span>
+                        @php
+                            $unreadCount = auth()->user()->unreadNotifications()->count();
+                        @endphp
+                        @if($unreadCount > 0)
+                            <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                                {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                            </span>
+                        @endif
+                    </a>
+                </div>
+                <div class="pt-4 pb-3 border-t border-gray-200">
+                    <div class="flex items-center px-4">
+                        <div class="flex-shrink-0">
+                            <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span class="text-sm font-medium text-gray-700">
+                                    {{ substr(Auth::user()->name, 0, 2) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-base font-medium text-gray-800">{{ Auth::user()->name }}</div>
+                            <div class="text-sm font-medium text-gray-500">{{ Auth::user()->email }}</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 space-y-1">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="block w-full text-left pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300">
+                                Logout
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -77,5 +144,19 @@
             </div>
         </main>
     </div>
+
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

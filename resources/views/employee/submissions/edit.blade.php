@@ -62,16 +62,54 @@
                                     Required
                                 </span>
                             @endif
+                            @if($task->requires_signature)
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    Signature
+                                </span>
+                            @endif
                             @if($submissionTask->status === 'completed')
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     Completed
+                                </span>
+                            @elseif($submissionTask->status === 'rejected')
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    Rejected
+                                </span>
+                            @elseif($submissionTask->redo_requested)
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                    Redo Required
                                 </span>
                             @endif
                         </div>
                     </div>
                 </div>
 
-                @if($submissionTask->status === 'pending')
+                @if($submissionTask->status === 'rejected' || $submissionTask->redo_requested)
+                    <!-- Rejection/Redo Information -->
+                    <div class="px-6 py-4 bg-red-50 border-l-4 border-red-400">
+                        <div class="text-sm">
+                            @if($submissionTask->status === 'rejected')
+                                <h4 class="font-medium text-red-900">Task Rejected</h4>
+                                @if($submissionTask->rejection_reason)
+                                    <p class="mt-1 text-red-800">
+                                        <strong>Reason:</strong> {{ $submissionTask->rejection_reason }}
+                                    </p>
+                                @endif
+                                <p class="mt-2 text-red-700">
+                                    This task was rejected on {{ $submissionTask->rejected_at->format('M j, Y g:i A') }}. 
+                                    Please review the feedback and complete the task again.
+                                </p>
+                            @elseif($submissionTask->redo_requested)
+                                <h4 class="font-medium text-orange-900">Redo Requested</h4>
+                                <p class="mt-1 text-orange-800">
+                                    Please redo this task. Review the instructions and complete it again.
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                @if($submissionTask->status === 'pending' || $submissionTask->status === 'rejected' || $submissionTask->redo_requested)
                     <!-- Task Completion Form -->
                     <div class="px-6 py-4">
                         @if($task->instructions)
@@ -123,9 +161,18 @@
                                 </div>
                             @endif
 
+                            <!-- Digital Signature for Individual Task -->
+                            @if($task->requires_signature)
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Digital Signature <span class="text-red-500">*</span></label>
+                                    <input type="text" name="digital_signature" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Type your full name as your digital signature">
+                                    <p class="mt-1 text-xs text-gray-500">By typing your name, you certify that this task has been completed accurately.</p>
+                                </div>
+                            @endif
+
                             <div class="flex justify-end">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                                    Mark as Complete
+                                    {{ $task->requires_signature ? '✍️ Sign & Complete' : 'Mark as Complete' }}
                                 </button>
                             </div>
                         </form>
