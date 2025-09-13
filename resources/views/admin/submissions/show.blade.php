@@ -1,6 +1,13 @@
-@extends('layouts.admin')
+    @extends('layouts.admin')
 
 @section('content')
+        @if($submission->employee_signature)
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Checklist Signature</h3>
+                <span class="block text-xs text-gray-500 mb-1">Employee's Drawn Signature:</span>
+                <img src="{{ $submission->employee_signature }}" alt="Checklist Signature" class="border border-gray-300 rounded bg-white max-w-xs max-h-32">
+            </div>
+        @endif
 <div class="space-y-6">
     <!-- Page Header -->
     <div class="bg-white shadow rounded-lg p-6">
@@ -60,7 +67,7 @@
                             @endif
 
                             <!-- Employee's Proof -->
-                            @if($submissionTask->proof_text || $submissionTask->proof_files)
+                            @if($submissionTask->proof_text || $submissionTask->proof_files || $submissionTask->digital_signature)
                                 <div class="mt-4 bg-gray-50 rounded-lg p-4">
                                     <h5 class="text-sm font-medium text-gray-900 mb-2">Employee's Proof:</h5>
                                     @if($submissionTask->proof_text)
@@ -71,14 +78,32 @@
                                             @foreach($submissionTask->proof_files as $file)
                                                 @php
                                                     $filename = is_array($file) ? (isset($file['path']) ? basename($file['path']) : '') : basename($file);
+                                                    $isImage = is_array($file) && isset($file['mime_type']) && strpos($file['mime_type'], 'image/') === 0;
                                                 @endphp
-                                                <div class="flex items-center text-sm text-blue-600">
-                                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-5L9 2H4z" clip-rule="evenodd"></path>
-                                                    </svg>
-                                                    {{ $filename }}
+                                                <div class="flex flex-col text-sm text-blue-600">
+                                                    <div class="flex items-center">
+                                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-5L9 2H4z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                        {{ $filename }}
+                                                    </div>
+                                                    @if($isImage && isset($file['path']))
+                                                        <img src="{{ url('storage/' . $file['path']) }}" alt="{{ $filename }}" class="mt-2 max-w-xs max-h-40 rounded shadow border" />
+                                                    @endif
+                                                    @if(is_array($file) && isset($file['mime_type']) && strpos($file['mime_type'], 'video/') === 0 && isset($file['path']))
+                                                        <video controls class="mt-2 max-w-xs max-h-40 rounded shadow border">
+                                                            <source src="{{ url('storage/' . $file['path']) }}" type="{{ $file['mime_type'] }}">
+                                                            Your browser does not support the video tag.
+                                                        </video>
+                                                    @endif
                                                 </div>
                                             @endforeach
+                                        </div>
+                                    @endif
+                                    @if($submissionTask->digital_signature)
+                                        <div class="mt-3">
+                                            <span class="block text-xs text-gray-500 mb-1">Employee Signature:</span>
+                                            <img src="{{ $submissionTask->digital_signature }}" alt="Signature" class="border border-gray-300 rounded bg-white max-w-xs max-h-32">
                                         </div>
                                     @endif
                                 </div>

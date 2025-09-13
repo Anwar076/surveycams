@@ -164,10 +164,43 @@
                             <!-- Digital Signature for Individual Task -->
                             @if($task->requires_signature)
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Digital Signature <span class="text-red-500">*</span></label>
-                                    <input type="text" name="digital_signature" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Type your full name as your digital signature">
-                                    <p class="mt-1 text-xs text-gray-500">By typing your name, you certify that this task has been completed accurately.</p>
+                                    <label class="block text-sm font-medium text-gray-700">Signature <span class="text-red-500">*</span></label>
+                                    <div class="mt-2">
+                                        <canvas id="signature-pad-task-{{ $submissionTask->id }}" class="border border-gray-300 rounded-md bg-white" width="350" height="120"></canvas>
+                                        <input type="hidden" name="digital_signature" id="signature-input-task-{{ $submissionTask->id }}" required>
+                                        <div class="flex space-x-2 mt-2">
+                                            <button type="button" class="px-3 py-1 bg-gray-200 rounded text-xs" onclick="clearSignaturePad('task-{{ $submissionTask->id }}')">Clear</button>
+                                        </div>
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">Draw your signature above. This will be saved as proof of completion.</p>
                                 </div>
+                                @push('scripts')
+                                <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+                                <script>
+                                    if (!window.signaturePads) window.signaturePads = {};
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        var canvas = document.getElementById('signature-pad-task-{{ $submissionTask->id }}');
+                                        if (canvas) {
+                                            var signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgba(255,255,255,0)' });
+                                            window.signaturePads['task-{{ $submissionTask->id }}'] = signaturePad;
+                                            var form = canvas.closest('form');
+                                            form.addEventListener('submit', function(e) {
+                                                if (signaturePad.isEmpty()) {
+                                                    alert('Please provide a signature.');
+                                                    e.preventDefault();
+                                                    return false;
+                                                }
+                                                document.getElementById('signature-input-task-{{ $submissionTask->id }}').value = signaturePad.toDataURL();
+                                            });
+                                        }
+                                    });
+                                    window.clearSignaturePad = function(key) {
+                                        if (window.signaturePads[key]) {
+                                            window.signaturePads[key].clear();
+                                        }
+                                    }
+                                </script>
+                                @endpush
                             @endif
 
                             <div class="flex justify-end">
@@ -198,6 +231,19 @@
                                     @foreach($submissionTask->proof_files as $file)
                                         <div class="text-sm text-indigo-600">
                                             📎 {{ $file['original_name'] }} ({{ number_format($file['size'] / 1024, 1) }} KB)
+                                            @if(isset($file['mime_type']) && strpos($file['mime_type'], 'image/') === 0)
+                                                <div class="mt-2">
+                                                    <img src="{{ url('storage/' . $file['path']) }}" alt="{{ $file['original_name'] }}" class="max-w-xs max-h-40 rounded shadow border" />
+                                                </div>
+                                            @endif
+                                            @if(isset($file['mime_type']) && strpos($file['mime_type'], 'video/') === 0)
+                                                <div class="mt-2">
+                                                    <video controls class="max-w-xs max-h-40 rounded shadow border">
+                                                        <source src="{{ url('storage/' . $file['path']) }}" type="{{ $file['mime_type'] }}">
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                </div>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>
@@ -227,9 +273,29 @@
                 @if($submission->taskList->requires_signature)
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Digital Signature <span class="text-red-500">*</span></label>
-                        <input type="text" name="employee_signature" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Type your full name as your digital signature">
-                        <p class="mt-1 text-xs text-gray-500">By typing your name, you certify that all tasks have been completed accurately.</p>
+                        <canvas id="signature-pad-final" class="border border-gray-300 rounded-md bg-white mt-1" width="350" height="120"></canvas>
+                        <input type="hidden" name="employee_signature" id="signature-input-final" required>
+                        <div class="mt-2 flex gap-2">
+                            <button type="button" class="px-3 py-1 bg-gray-200 rounded text-xs" onclick="clearSignaturePadFinal()">Clear</button>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Draw your signature above. This will be saved as proof of completion.</p>
                     </div>
+                    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+                    <script>
+                        var canvasFinal = document.getElementById('signature-pad-final');
+                        var signaturePadFinal = new SignaturePad(canvasFinal, { backgroundColor: 'rgba(255,255,255,0)' });
+                        function clearSignaturePadFinal() {
+                            signaturePadFinal.clear();
+                        }
+                        document.querySelector('form[action="{{ route('employee.submissions.complete', $submission) }}"]')?.addEventListener('submit', function(e) {
+                            if (signaturePadFinal.isEmpty()) {
+                                e.preventDefault();
+                                alert('Please provide a signature.');
+                                return false;
+                            }
+                            document.getElementById('signature-input-final').value = signaturePadFinal.toDataURL();
+                        });
+                    </script>
                 @endif
 
                 <div>

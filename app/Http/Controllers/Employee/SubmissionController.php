@@ -46,7 +46,10 @@ class SubmissionController extends Controller
             abort(403, 'You do not have access to this task list.');
         }
 
-        $list->load('tasks');
+        // Laad ALLE taken van de lijst, ongeacht assignment
+        $list->load(['tasks' => function ($query) {
+            $query->where('is_active', true);
+        }]);
         
         // Check if user has already started this list today
         $existingSubmission = Submission::where('user_id', $user->id)
@@ -115,9 +118,9 @@ class SubmissionController extends Controller
             abort(403, 'You do not have access to this submission.');
         }
 
-        $submission->load(['taskList', 'submissionTasks.task']);
-        
-        return view('employee.submissions.edit', compact('submission'));
+    $submission->load(['taskList', 'submissionTasks.task']);
+    // Laat ALLE taken zien die bij deze submission horen
+    return view('employee.submissions.edit', compact('submission'));
     }
 
     /**

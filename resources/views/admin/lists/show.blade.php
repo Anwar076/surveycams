@@ -129,6 +129,11 @@
 
         <!-- Assignments & Stats -->
         <div class="space-y-6">
+            @if(session('success'))
+                <div class="mb-4 p-3 rounded bg-green-100 text-green-800 border border-green-200">
+                    {{ session('success') }}
+                </div>
+            @endif
             <!-- Quick Assign -->
             <div class="bg-white shadow rounded-lg">
                 <div class="px-6 py-4 border-b border-gray-200">
@@ -150,20 +155,20 @@
                             <label class="block text-sm font-medium text-gray-700">Select Users</label>
                             <select name="user_ids[]" multiple class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 @foreach(\App\Models\User::where('role', 'employee')->get() as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->department }})</option>
+                                    <option value="{{ $user->id }}" {{ $list->assignments->where('user_id', $user->id)->count() ? 'selected' : '' }}>{{ $user->name }} ({{ $user->department }})</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div id="department_selection" class="assignment-option hidden">
                             <label class="block text-sm font-medium text-gray-700">Department</label>
-                            <input type="text" name="department" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Cleaning, Operations">
+                            <input type="text" name="department" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Cleaning, Operations" value="{{ optional($list->assignments->where('department', '!=', null)->first())->department }}">
                         </div>
 
                         <div id="role_selection" class="assignment-option hidden">
                             <label class="block text-sm font-medium text-gray-700">Role</label>
                             <select name="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="employee">Employee</option>
+                                <option value="employee" {{ $list->assignments->where('role', 'employee')->count() ? 'selected' : '' }}>Employee</option>
                             </select>
                         </div>
 

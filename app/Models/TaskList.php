@@ -1,4 +1,7 @@
 <?php
+/**
+ * @property int $id
+ */
 
 namespace App\Models;
 

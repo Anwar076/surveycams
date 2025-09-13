@@ -136,21 +136,24 @@ class TaskListController extends Controller
     }
 
     /**
-     * Assign list to users/departments
+     * Assign list to users/departments/roles
      */
     public function assign(Request $request, TaskList $list)
     {
         $validated = $request->validate([
-            'assignment_type' => 'required|in:user,department,role',
+            'assignment_type' => ['required', Rule::in(['user', 'department', 'role'])],
             'user_ids' => 'required_if:assignment_type,user|array',
-            'user_ids.*' => 'exists:users,id',
+            'user_ids.*' => 'required_if:assignment_type,user|exists:users,id',
             'department' => 'required_if:assignment_type,department|string',
             'role' => 'required_if:assignment_type,role|string',
             'assigned_date' => 'required|date',
             'due_date' => 'nullable|date|after_or_equal:assigned_date',
         ]);
 
+        // Remove previous assignments of this type for this list
         if ($validated['assignment_type'] === 'user') {
+            // Remove all user assignments for this list
+            ListAssignment::where('list_id', $list->id)->whereNotNull('user_id')->delete();
             foreach ($validated['user_ids'] as $userId) {
                 ListAssignment::create([
                     'list_id' => $list->id,
@@ -160,6 +163,8 @@ class TaskListController extends Controller
                 ]);
             }
         } elseif ($validated['assignment_type'] === 'department') {
+            // Remove all department assignments for this list
+            ListAssignment::where('list_id', $list->id)->whereNotNull('department')->delete();
             ListAssignment::create([
                 'list_id' => $list->id,
                 'department' => $validated['department'],
@@ -167,6 +172,8 @@ class TaskListController extends Controller
                 'due_date' => $validated['due_date'],
             ]);
         } elseif ($validated['assignment_type'] === 'role') {
+            // Remove all role assignments for this list
+            ListAssignment::where('list_id', $list->id)->whereNotNull('role')->delete();
             ListAssignment::create([
                 'list_id' => $list->id,
                 'role' => $validated['role'],
