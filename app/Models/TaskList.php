@@ -61,7 +61,7 @@ class TaskList extends Model
 
     public function tasks()
     {
-        return $this->hasMany(Task::class, 'list_id')->orderBy('order_index');
+        return $this->hasMany(Task::class, 'list_id')->orderBy('order')->orderBy('order_index');
     }
 
     public function assignments()
@@ -153,5 +153,42 @@ class TaskList extends Model
                 ]);
             }
         }
+    }
+
+    // Weekly Structure methods
+    public function hasWeeklyStructure()
+    {
+        $config = is_array($this->schedule_config) ? $this->schedule_config : [];
+        return isset($config['weekly_structure']['enabled']) && 
+               $config['weekly_structure']['enabled'];
+    }
+
+    public function getWeeklyStructure()
+    {
+        $config = is_array($this->schedule_config) ? $this->schedule_config : [];
+        return $config['weekly_structure'] ?? null;
+    }
+
+    public function getSelectedDays()
+    {
+        $config = is_array($this->schedule_config) ? $this->schedule_config : [];
+        return $config['weekly_structure']['selected_days'] ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    }
+
+    public function getTasksForDay($day)
+    {
+        return $this->tasks()->where('weekday', $day)->orderBy('order')->orderBy('order_index')->get();
+    }
+
+    public function getTasksByDay()
+    {
+        $tasksByDay = [];
+        $selectedDays = $this->getSelectedDays();
+        
+        foreach ($selectedDays as $day) {
+            $tasksByDay[$day] = $this->getTasksForDay($day);
+        }
+        
+        return $tasksByDay;
     }
 }

@@ -17,12 +17,32 @@ class TaskListController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $lists = TaskList::with(['creator', 'tasks'])
-            ->withCount('submissions')
-            ->latest()
-            ->paginate(15);
+        $query = TaskList::with(['creator', 'tasks'])
+            ->withCount('submissions');
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->get('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('category', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Category filter
+        if ($request->filled('category')) {
+            $query->where('category', $request->get('category'));
+        }
+
+        // Priority filter
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->get('priority'));
+        }
+
+        $lists = $query->latest()->paginate(15);
 
         return view('admin.lists.index', compact('lists'));
     }
@@ -64,6 +84,18 @@ class TaskListController extends Controller
             'is_template' => 'boolean',
             'is_active' => 'boolean',
             'create_daily_sublists' => 'boolean',
+            // Weekly Schedule Structure fields
+            'enable_weekly_structure' => 'boolean',
+            'selected_days' => 'nullable|array',
+            'selected_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'day_tasks' => 'nullable|array',
+            'day_tasks.*' => 'array',
+            'day_tasks.*.*.title' => 'required|string|max:255',
+            'day_tasks.*.*.order' => 'required|integer|min:1',
+            'day_tasks.*.*.description' => 'nullable|string',
+            'day_tasks.*.*.is_required' => 'boolean',
+            'day_tasks.*.*.required_proof_type' => 'in:none,photo,signature,both',
+            'day_tasks.*.*.instructions' => 'nullable|string',
         ]);
 
         // Clean up schedule_config based on schedule_type
@@ -110,7 +142,20 @@ class TaskListController extends Controller
 
         $list = TaskList::create($validated);
 
-        // Create daily sub-lists if requested
+        // Handle Weekly Schedule Structure
+        if ($request->has('enable_weekly_structure') && $request->get('enable_weekly_structure')) {
+            // Store the weekly structure in schedule_config
+            $list->update([
+                'schedule_config' => array_merge($list->schedule_config ?? [], [
+                    'weekly_structure' => [
+                        'enabled' => true,
+                        'selected_days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] // Default to all days
+                    ]
+                ])
+            ]);
+        }
+
+        // Legacy: Create daily sub-lists if requested (for backward compatibility)
         if ($request->has('create_daily_sublists') && $list->isMainList()) {
             $list->createDailySubLists();
         }
@@ -124,7 +169,13 @@ class TaskListController extends Controller
      */
     public function show(TaskList $list)
     {
-        $list->load(['tasks', 'assignments.user', 'submissions.user']);
+        // Load tasks with proper relationships
+        $list->load(['assignments.user', 'submissions.user']);
+        
+        // Load all tasks for this list (both general and day-specific)
+        $list->load(['tasks' => function ($query) {
+            $query->orderBy('order_index')->orderBy('created_at');
+        }]);
         
         return view('admin.lists.show', compact('list'));
     }
@@ -169,6 +220,18 @@ class TaskListController extends Controller
             'is_template' => 'boolean',
             'is_active' => 'boolean',
             'create_daily_sublists' => 'boolean',
+            // Weekly Schedule Structure fields
+            'enable_weekly_structure' => 'boolean',
+            'selected_days' => 'nullable|array',
+            'selected_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'day_tasks' => 'nullable|array',
+            'day_tasks.*' => 'array',
+            'day_tasks.*.*.title' => 'required|string|max:255',
+            'day_tasks.*.*.order' => 'required|integer|min:1',
+            'day_tasks.*.*.description' => 'nullable|string',
+            'day_tasks.*.*.is_required' => 'boolean',
+            'day_tasks.*.*.required_proof_type' => 'in:none,photo,signature,both',
+            'day_tasks.*.*.instructions' => 'nullable|string',
         ]);
 
         // Clean up schedule_config based on schedule_type
@@ -213,7 +276,53 @@ class TaskListController extends Controller
 
         $list->update($validated);
 
-        // Create daily sub-lists if requested and this is a main list
+        // Handle Weekly Schedule Structure
+        if ($request->has('enable_weekly_structure') && $request->get('enable_weekly_structure')) {
+            $selectedDays = $request->get('selected_days', []);
+            $dayTasks = $request->get('day_tasks', []);
+            
+            // Store the weekly structure in schedule_config
+            $list->update([
+                'schedule_config' => array_merge($list->schedule_config ?? [], [
+                    'weekly_structure' => [
+                        'enabled' => true,
+                        'selected_days' => $selectedDays,
+                        'day_tasks' => $dayTasks
+                    ]
+                ])
+            ]);
+
+            // Remove existing tasks with weekday assignments
+            $list->tasks()->whereNotNull('weekday')->delete();
+
+            // Create tasks for each day
+            foreach ($selectedDays as $day) {
+                if (isset($dayTasks[$day])) {
+                    foreach ($dayTasks[$day] as $taskData) {
+                        $list->tasks()->create([
+                            'title' => $taskData['title'],
+                            'description' => $taskData['description'] ?? null,
+                            'order' => $taskData['order'],
+                            'is_required' => $taskData['is_required'] ?? false,
+                            'required_proof_type' => $taskData['required_proof_type'] ?? 'none',
+                            'instructions' => $taskData['instructions'] ?? null,
+                            'weekday' => $day,
+                            'created_by' => auth()->id(),
+                        ]);
+                    }
+                }
+            }
+        } else {
+            // Remove weekly structure if disabled
+            $scheduleConfig = $list->schedule_config ?? [];
+            unset($scheduleConfig['weekly_structure']);
+            $list->update(['schedule_config' => $scheduleConfig]);
+            
+            // Remove tasks with weekday assignments
+            $list->tasks()->whereNotNull('weekday')->delete();
+        }
+
+        // Legacy: Create daily sub-lists if requested and this is a main list
         if ($request->has('create_daily_sublists') && $list->isMainList()) {
             $list->createDailySubLists();
         }
@@ -227,6 +336,24 @@ class TaskListController extends Controller
      */
     public function destroy(TaskList $list)
     {
+        // Delete all related records first to avoid foreign key constraints
+        // Delete submissions and submission tasks
+        $submissions = Submission::where('list_id', $list->id)->get();
+        foreach ($submissions as $submission) {
+            $submission->submissionTasks()->delete();
+            $submission->delete();
+        }
+        
+        // Delete list assignments
+        ListAssignment::where('list_id', $list->id)->delete();
+        
+        // Delete tasks
+        $list->tasks()->delete();
+        
+        // Delete sublists if any
+        $list->subLists()->delete();
+        
+        // Finally delete the list itself
         $list->delete();
 
         return redirect()->route('admin.lists.index')
@@ -274,8 +401,6 @@ class TaskListController extends Controller
                     'list_id' => $list->id,
                     'department' => $validated['department'],
                     'assigned_date' => $validated['assigned_date'],
-                    'department' => $validated['department'],
-                    'assigned_date' => $validated['assigned_date'],
                     'due_date' => $validated['due_date'],
                 ]);
             } elseif ($validated['assignment_type'] === 'role') {
@@ -290,17 +415,63 @@ class TaskListController extends Controller
             }
             
             \Log::info('Assignment successful for list ' . $list->id);
+            
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'List assigned successfully.'
+                ]);
+            }
+            
             return back()->with('success', 'List assigned successfully.');
             
         } catch (\Exception $e) {
             \Log::error('Assignment failed: ' . $e->getMessage());
+            
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Assignment failed: ' . $e->getMessage()
+                ], 422);
+            }
+            
             return back()->withErrors(['error' => 'Assignment failed: ' . $e->getMessage()]);
         }
     }
 
     /**
-     * View all submissions
+     * Remove assignment
      */
+    public function removeAssignment(Request $request, $assignmentId)
+    {
+        try {
+            $assignment = ListAssignment::findOrFail($assignmentId);
+            $assignment->delete();
+            
+            \Log::info('Assignment removed successfully: ' . $assignmentId);
+            
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Assignment removed successfully.'
+                ]);
+            }
+            
+            return back()->with('success', 'Assignment removed successfully.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to remove assignment: ' . $e->getMessage());
+            
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to remove assignment: ' . $e->getMessage()
+                ], 422);
+            }
+            
+            return back()->withErrors(['error' => 'Failed to remove assignment: ' . $e->getMessage()]);
+        }
+    }
     public function submissions(Request $request)
     {
         $query = Submission::with(['user', 'taskList']);
@@ -404,14 +575,72 @@ class TaskListController extends Controller
                 ->with(['taskList', 'submissionTasks'])
                 ->get();
 
+            $totalSubmissions = $submissions->count();
+            $completedSubmissions = $submissions->where('status', 'completed');
+            $rejectedSubmissions = $submissions->filter(function ($submission) {
+                return $submission->hasRejectedTasks();
+            });
+
+            // Calculate completion rate
+            $completionRate = $totalSubmissions > 0 ? 
+                round(($completedSubmissions->count() / $totalSubmissions) * 100, 1) : 0;
+
+            // Calculate average completion time (in hours)
+            $avgCompletionTime = 0;
+            if ($completedSubmissions->count() > 0) {
+                $totalTime = $completedSubmissions->sum(function ($submission) {
+                    // Use created_at as fallback if started_at is not available
+                    $startTime = $submission->started_at ?? $submission->created_at;
+                    $endTime = $submission->completed_at;
+                    
+                    if ($startTime && $endTime) {
+                        // Calculate difference in hours, with minimum of 0.1 hours
+                        $hours = $startTime->diffInHours($endTime);
+                        return max($hours, 0.1); // Minimum 0.1 hours (6 minutes)
+                    }
+                    return 0;
+                });
+                
+                $avgCompletionTime = $totalTime > 0 ? round($totalTime / $completedSubmissions->count(), 1) : 0;
+            }
+
+            // Calculate on-time rate (submissions completed within expected timeframe)
+            $onTimeRate = 0;
+            if ($completedSubmissions->count() > 0) {
+                $onTimeSubmissions = $completedSubmissions->filter(function ($submission) {
+                    // Use started_at as fallback if available, otherwise use created_at
+                    $startTime = $submission->started_at ?? $submission->created_at;
+                    
+                    // Consider a submission on-time if completed within 24 hours of start
+                    $expectedTime = $startTime->addHours(24);
+                    return $submission->completed_at && $submission->completed_at <= $expectedTime;
+                });
+                $onTimeRate = round(($onTimeSubmissions->count() / $completedSubmissions->count()) * 100, 1);
+            }
+
+            // Calculate quality score based on completion rate and rejection rate
+            $rejectionRate = $totalSubmissions > 0 ? 
+                ($rejectedSubmissions->count() / $totalSubmissions) * 100 : 0;
+            
+            // Quality score: 5 = perfect, 0 = poor
+            // Based on completion rate (70% weight) and low rejection rate (30% weight)
+            $qualityScore = 0;
+            if ($totalSubmissions > 0) {
+                $completionScore = ($completionRate / 100) * 3.5; // Max 3.5 points
+                $rejectionScore = max(0, 1.5 - ($rejectionRate / 100) * 1.5); // Max 1.5 points
+                $qualityScore = round($completionScore + $rejectionScore, 1);
+            }
+
             $overview[$employee->id] = [
                 'employee' => $employee,
-                'total_submissions' => $submissions->count(),
-                'completed' => $submissions->where('status', 'completed')->count(),
+                'total_submissions' => $totalSubmissions,
+                'completed' => $completedSubmissions->count(),
                 'in_progress' => $submissions->where('status', 'in_progress')->count(),
-                'rejected' => $submissions->filter(function ($submission) {
-                    return $submission->hasRejectedTasks();
-                })->count(),
+                'rejected' => $rejectedSubmissions->count(),
+                'completion_rate' => $completionRate,
+                'avg_completion_time' => $avgCompletionTime,
+                'on_time_rate' => $onTimeRate,
+                'quality_score' => $qualityScore,
                 'submissions' => $submissions,
             ];
         }

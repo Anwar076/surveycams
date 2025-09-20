@@ -27,6 +27,27 @@ class DashboardController extends Controller
         // Get assigned lists for today using the new ScheduleService
         $todaysLists = $this->scheduleService->getScheduledTasksForUser($user, today());
         
+        // Load tasks with proper filtering for weekly structure lists
+        $todaysLists->each(function ($list) {
+            if ($list->hasWeeklyStructure()) {
+                // For weekly structure lists, only load tasks for today's weekday or general tasks
+                $todayWeekday = strtolower(now()->format('l')); // monday, tuesday, etc.
+                
+                $list->load(['tasks' => function ($query) use ($todayWeekday) {
+                    $query->where('is_active', true)
+                          ->where(function ($q) use ($todayWeekday) {
+                              $q->where('weekday', $todayWeekday)  // Tasks for today
+                                ->orWhereNull('weekday');           // General tasks (no specific day)
+                          });
+                }]);
+            } else {
+                // For regular lists, load all active tasks
+                $list->load(['tasks' => function ($query) {
+                    $query->where('is_active', true);
+                }]);
+            }
+        });
+        
         // Get recent submissions
         $recentSubmissions = Submission::with(['taskList'])
             ->where('user_id', $user->id)

@@ -16,31 +16,17 @@ class TaskController extends Controller
      */
     public function create(Request $request, TaskList $list)
     {
-        $users = User::where('role', 'employee')->where('is_active', true)->get();
         $selectedWeekday = $request->get('weekday');
         
         // If creating for a specific weekday, find or create the sublist
         $targetList = $list;
-        if ($selectedWeekday && $list->isMainList()) {
-            $subList = $list->subLists()->where('weekday', $selectedWeekday)->first();
-            if (!$subList) {
-                $subList = $list->subLists()->create([
-                    'title' => $list->title . ' – ' . ucfirst($selectedWeekday),
-                    'description' => $list->description,
-                    'weekday' => $selectedWeekday,
-                    'schedule_type' => 'daily',
-                    'priority' => $list->priority,
-                    'category' => $list->category,
-                    'requires_signature' => $list->requires_signature,
-                    'is_template' => false,
-                    'is_active' => true,
-                    'created_by' => auth()->id(),
-                ]);
-            }
-            $targetList = $subList;
+        if ($selectedWeekday && $list->hasWeeklyStructure()) {
+            // For weekly structure lists, we don't create sublists
+            // Instead, we just pass the weekday parameter to the form
+            $targetList = $list;
         }
         
-        return view('admin.tasks.create', compact('list', 'targetList', 'users', 'selectedWeekday'));
+        return view('admin.tasks.create', compact('list', 'targetList', 'selectedWeekday'));
     }
 
     /**
@@ -56,14 +42,14 @@ class TaskController extends Controller
             'is_required' => 'boolean',
             'requires_signature' => 'boolean',
             'order_index' => 'nullable|integer|min:1',
-            'assigned_users' => 'nullable|array',
-            'assigned_users.*' => 'exists:users,id',
             'target_list_id' => 'nullable|exists:lists,id', // For weekday specific creation
+            'weekdays' => 'nullable|array', // For weekly structure
+            'weekdays.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
         ]);
 
         // Determine the target list (weekday sublist or main list)
         $targetList = $list;
-        if ($validated['target_list_id'] && $validated['target_list_id'] !== $list->id) {
+        if (isset($validated['target_list_id']) && $validated['target_list_id'] && $validated['target_list_id'] !== $list->id) {
             $targetList = TaskList::findOrFail($validated['target_list_id']);
         }
 
@@ -75,22 +61,38 @@ class TaskController extends Controller
         // Remove target_list_id from validated data as it's not a Task field
         unset($validated['target_list_id']);
 
-        $task = Task::create($validated);
-
-        // Assign users to the task if specified
-        if (!empty($validated['assigned_users'])) {
-            foreach ($validated['assigned_users'] as $userId) {
-                TaskAssignment::create([
-                    'task_id' => $task->id,
-                    'user_id' => $userId,
-                    'assigned_at' => now(),
-                    'is_active' => true,
-                ]);
+        // Handle weekday assignment for tasks
+        if ($list->hasWeeklyStructure() && isset($validated['weekdays']) && !empty($validated['weekdays'])) {
+            // Multiple weekdays selected - create task for each day
+            $weekdays = $validated['weekdays'];
+            unset($validated['weekdays']); // Remove from main data
+            
+            $createdTasks = [];
+            foreach ($weekdays as $weekday) {
+                $taskData = $validated;
+                $taskData['weekday'] = $weekday;
+                $taskData['order'] = $validated['order_index']; // Use order_index as order
+                $taskData['created_by'] = auth()->id();
+                
+                $createdTasks[] = Task::create($taskData);
             }
+            
+            return redirect()->route('admin.lists.show', $list)
+                ->with('success', 'Tasks created successfully for ' . count($weekdays) . ' day(s).');
+        } else {
+            // Single task creation
+            $validated['created_by'] = auth()->id();
+            
+            // If no weekdays selected, this is a general task (weekday = null)
+            if (!isset($validated['weekdays']) || empty($validated['weekdays'])) {
+                $validated['weekday'] = null;
+            }
+            
+            $task = Task::create($validated);
+            
+            return redirect()->route('admin.lists.show', $list)
+                ->with('success', 'Task added successfully.');
         }
-
-        return redirect()->route('admin.lists.show', $list)
-            ->with('success', 'Task added successfully.');
     }
 
     /**
@@ -98,9 +100,7 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        $users = User::where('role', 'employee')->where('is_active', true)->get();
-        $assignedUsers = $task->assignedUsers->pluck('id')->toArray();
-        return view('admin.tasks.edit', compact('task', 'users', 'assignedUsers'));
+        return view('admin.tasks.edit', compact('task'));
     }
 
     /**
@@ -116,30 +116,27 @@ class TaskController extends Controller
             'is_required' => 'boolean',
             'requires_signature' => 'boolean',
             'order_index' => 'nullable|integer|min:1',
-            'assigned_users' => 'nullable|array',
-            'assigned_users.*' => 'exists:users,id',
+            'weekdays' => 'nullable|array', // For weekly structure
+            'weekdays.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
         ]);
 
         $validated['is_required'] = $request->has('is_required');
         $validated['requires_signature'] = $request->has('requires_signature');
 
-        $task->update($validated);
-
-        // Update task assignments
-        if (isset($validated['assigned_users'])) {
-            // Remove old assignments
-            $task->assignments()->delete();
+        // Handle weekdays for weekly structure
+        if ($task->taskList->hasWeeklyStructure() && isset($validated['weekdays']) && !empty($validated['weekdays'])) {
+            $weekdays = $validated['weekdays'];
+            unset($validated['weekdays']); // Remove from main data
             
-            // Add new assignments
-            foreach ($validated['assigned_users'] as $userId) {
-                TaskAssignment::create([
-                    'task_id' => $task->id,
-                    'user_id' => $userId,
-                    'assigned_at' => now(),
-                    'is_active' => true,
-                ]);
-            }
+            // Update the task with the first selected weekday (for single task editing)
+            $validated['weekday'] = $weekdays[0];
+            $validated['order'] = $validated['order_index']; // Use order_index as order
+        } else {
+            // Clear weekday if no days selected (general task)
+            $validated['weekday'] = null;
         }
+
+        $task->update($validated);
 
         return redirect()->route('admin.lists.show', $task->taskList)
             ->with('success', 'Task updated successfully.');
@@ -151,6 +148,11 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         $list = $task->taskList;
+        
+        // Delete all related submission tasks first to avoid foreign key constraints
+        $task->submissionTasks()->delete();
+        
+        // Delete the task itself
         $task->delete();
 
         return redirect()->route('admin.lists.show', $list)

@@ -1,131 +1,178 @@
 @extends('layouts.employee')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Task List Header -->
-    <div class="bg-white shadow rounded-lg p-6">
-        <div class="flex justify-between items-start">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ $list->title }}</h1>
-                <p class="mt-2 text-gray-600">{{ $list->description }}</p>
-                <div class="mt-4 flex items-center space-x-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <!-- Mobile-First Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-6 rounded-b-3xl shadow-lg">
+        <div class="flex items-center justify-between mb-4">
+            <button onclick="history.back()" class="w-10 h-10 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                </svg>
+            </div>
+        </div>
+        <h1 class="text-2xl font-bold mb-2">{{ $list->title }}</h1>
+        <p class="text-indigo-100 text-sm">{{ $list->description }}</p>
+    </div>
+
+    <!-- Priority & Status Badges -->
+    <div class="px-4 -mt-4 relative z-10">
+        <div class="bg-white rounded-2xl shadow-lg p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center px-4 py-2 rounded-2xl text-sm font-semibold
                         @if($list->priority === 'urgent') bg-red-100 text-red-800
                         @elseif($list->priority === 'high') bg-orange-100 text-orange-800
                         @elseif($list->priority === 'medium') bg-yellow-100 text-yellow-800
                         @else bg-green-100 text-green-800 @endif">
+                        @if($list->priority === 'urgent') 🔴 @elseif($list->priority === 'high') 🟠 @elseif($list->priority === 'medium') 🟡 @else 🟢 @endif
                         {{ ucfirst($list->priority) }} Priority
                     </span>
-                    <span class="text-sm text-gray-500">{{ $list->tasks->count() }} tasks</span>
-                    @if($list->isDailySubList())
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                            {{ ucfirst($list->weekday) }}
-                        </span>
-                    @endif
+                    <span class="inline-flex items-center px-4 py-2 rounded-2xl text-sm font-semibold bg-gray-100 text-gray-800">
+                        📋 {{ $list->tasks->count() }} tasks
+                    </span>
                     @if($list->requires_signature)
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            Signature Required
+                        <span class="inline-flex items-center px-4 py-2 rounded-2xl text-sm font-semibold bg-purple-100 text-purple-800">
+                            ✍️ Signature Required
                         </span>
                     @endif
                 </div>
             </div>
-            <div>
-                @if($existingSubmission)
-                    <a href="{{ route('employee.submissions.edit', $existingSubmission) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
-                        Continue Working
-                    </a>
-                @else
-                    <form method="POST" action="{{ route('employee.submissions.start', $list) }}">
-                        @csrf
-                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                            Start Checklist
-                        </button>
-                    </form>
-                @endif
-            </div>
         </div>
     </div>
 
-    <!-- Task Preview -->
-    <div class="bg-white shadow rounded-lg">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Tasks Preview</h3>
-        </div>
-        <div class="divide-y divide-gray-200">
-            @foreach($list->tasks as $task)
-                <div class="px-6 py-4">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 mt-1">
-                            <div class="w-4 h-4 border-2 border-gray-300 rounded"></div>
-                        </div>
-                        <div class="ml-3 flex-1">
-                            <div class="flex justify-between">
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-900">{{ $task->title }}</h4>
-                                    @if($task->description)
-                                        <p class="mt-1 text-sm text-gray-600">{{ $task->description }}</p>
-                                    @endif
-                                    @if($task->instructions)
-                                        <div class="mt-2 text-sm text-gray-500">
-                                            <strong>Instructions:</strong> {{ $task->instructions }}
-                                        </div>
-                                    @endif
+    <!-- Simplified Task Preview -->
+    <div class="px-4 mt-6">
+        <div class="bg-white rounded-3xl shadow-lg overflow-hidden">
+            <div class="p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    </svg>
+                    Task Overview
+                </h3>
+                <div class="space-y-3">
+                    @foreach($list->tasks as $index => $task)
+                        <div class="flex items-start p-4 bg-gray-50 rounded-2xl">
+                            <div class="flex-shrink-0 mt-1">
+                                <div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
+                                    <span class="text-xs font-bold text-gray-600">{{ $index + 1 }}</span>
                                 </div>
-                                <div class="flex items-center space-x-2">
+                            </div>
+                            <div class="ml-3 flex-1">
+                                <h4 class="font-semibold text-gray-900 text-sm">{{ $task->title }}</h4>
+                                @if($task->description)
+                                    <p class="text-xs text-gray-600 mt-1">{{ Str::limit($task->description, 80) }}</p>
+                                @endif
+                                <div class="flex items-center gap-2 mt-2">
                                     @if($task->is_required)
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-xl text-xs font-medium bg-red-100 text-red-800">
                                             Required
                                         </span>
                                     @endif
                                     @if($task->requires_signature)
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                            Signature
+                                        <span class="inline-flex items-center px-2 py-1 rounded-xl text-xs font-medium bg-purple-100 text-purple-800">
+                                            ✍️ Signature
                                         </span>
                                     @endif
                                     @if($task->required_proof_type !== 'none')
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            {{ ucfirst($task->required_proof_type) }} Required
+                                        <span class="inline-flex items-center px-2 py-1 rounded-xl text-xs font-medium bg-blue-100 text-blue-800">
+                                            📎 {{ ucfirst($task->required_proof_type) }}
                                         </span>
                                     @endif
                                 </div>
                             </div>
                         </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple Instructions -->
+    <div class="px-4 mt-6">
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-3xl p-6">
+            <div class="flex items-start">
+                <div class="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-blue-900 mb-3">How it works</h3>
+                    <div class="space-y-2 text-sm text-blue-800">
+                        <div class="flex items-center">
+                            <span class="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 text-xs font-bold">1</span>
+                            Complete tasks in order
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 text-xs font-bold">2</span>
+                            Upload proof when required
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 text-xs font-bold">3</span>
+                            @if($list->requires_signature) Sign and submit @else Submit for review @endif
+                        </div>
                     </div>
                 </div>
-            @endforeach
-        </div>
-    </div>
-
-    <!-- Instructions -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                </svg>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-blue-800">Instructions</h3>
-                <div class="mt-2 text-sm text-blue-700">
-                    <ul class="list-disc list-inside space-y-1">
-                        <li>Click "Start Checklist" to begin working on this task list</li>
-                        <li>Complete each task in order, providing required proof when needed</li>
-                        <li>You can save your progress and continue later</li>
-                        @if($list->requires_signature)
-                            <li>A digital signature will be required before final submission</li>
-                        @endif
-                        <li>Once all required tasks are complete, submit for manager review</li>
-                    </ul>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Back to Dashboard -->
-    <div class="flex justify-center">
-        <a href="{{ route('employee.dashboard') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-            ← Back to Dashboard
-        </a>
+    <!-- Action Button -->
+    <div class="px-4 mt-8 mb-8">
+        @if($existingSubmission)
+            <a href="{{ route('employee.submissions.edit', $existingSubmission) }}" 
+               class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-5 rounded-3xl font-bold text-center block hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg">
+                🔄 Continue Working
+            </a>
+        @else
+            <form method="POST" action="{{ route('employee.submissions.start', $list) }}">
+                @csrf
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-8 py-5 rounded-3xl font-bold hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg">
+                    🚀 Start Task
+                </button>
+            </form>
+        @endif
     </div>
 </div>
+
+<!-- Enhanced JavaScript -->
+<script>
+// Add smooth animations
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.bg-white.rounded-3xl, .bg-gradient-to-r');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+        
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+});
+
+// Add touch feedback for mobile
+document.addEventListener('touchstart', function(e) {
+    if (e.target.closest('button, a')) {
+        e.target.closest('button, a').style.transform = 'scale(0.98)';
+    }
+});
+
+document.addEventListener('touchend', function(e) {
+    if (e.target.closest('button, a')) {
+        setTimeout(() => {
+            e.target.closest('button, a').style.transform = '';
+        }, 150);
+    }
+});
+</script>
 @endsection

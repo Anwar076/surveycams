@@ -17,9 +17,12 @@ class Task extends Model
         'required_proof_type',
         'is_required',
         'order_index',
+        'order',
         'attachments',
         'validation_rules',
         'requires_signature',
+        'weekday',
+        'created_by',
     ];
 
     protected function casts(): array
@@ -62,5 +65,20 @@ class Task extends Model
     public function scopeByProofType($query, $type)
     {
         return $query->where('required_proof_type', $type);
+    }
+
+    public function scopeByWeekday($query, $weekday)
+    {
+        return $query->where('weekday', $weekday);
+    }
+
+    public function scopeWithWeekday($query)
+    {
+        return $query->whereNotNull('weekday');
+    }
+
+    public function scopeWithoutWeekday($query)
+    {
+        return $query->whereNull('weekday');
     }
 }

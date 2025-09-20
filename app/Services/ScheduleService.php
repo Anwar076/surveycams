@@ -115,6 +115,19 @@ class ScheduleService
             return $taskList->weekday === $dayOfWeek;
         }
 
+        // If it's a weekly structure list, check if it has tasks for today
+        if ($taskList->hasWeeklyStructure()) {
+            $dayOfWeek = strtolower($date->format('l'));
+            // Check if there are tasks for today OR general tasks (no specific weekday)
+            return $taskList->tasks()
+                ->where('is_active', true)
+                ->where(function ($query) use ($dayOfWeek) {
+                    $query->where('weekday', $dayOfWeek)  // Tasks for today
+                          ->orWhereNull('weekday');        // General tasks
+                })
+                ->exists();
+        }
+
         // If it's a main list, check schedule type
         if ($taskList->isMainList()) {
             return $this->checkMainListSchedule($taskList, $date);

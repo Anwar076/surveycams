@@ -174,33 +174,46 @@
                                     </div>
                                     <p class="mt-1 text-xs text-gray-500">Draw your signature above. This will be saved as proof of completion.</p>
                                 </div>
-                                @push('scripts')
                                 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
                                 <script>
-                                    if (!window.signaturePads) window.signaturePads = {};
+                                    // Initialize signature pad when page loads
                                     document.addEventListener('DOMContentLoaded', function() {
+                                        if (!window.signaturePads) window.signaturePads = {};
+                                        
                                         var canvas = document.getElementById('signature-pad-task-{{ $submissionTask->id }}');
-                                        if (canvas) {
-                                            var signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgba(255,255,255,0)' });
-                                            window.signaturePads['task-{{ $submissionTask->id }}'] = signaturePad;
-                                            var form = canvas.closest('form');
-                                            form.addEventListener('submit', function(e) {
-                                                if (signaturePad.isEmpty()) {
-                                                    alert('Please provide a signature.');
-                                                    e.preventDefault();
-                                                    return false;
-                                                }
-                                                document.getElementById('signature-input-task-{{ $submissionTask->id }}').value = signaturePad.toDataURL();
+                                        if (canvas && typeof SignaturePad !== 'undefined') {
+                                            var signaturePad = new SignaturePad(canvas, { 
+                                                backgroundColor: 'rgba(255,255,255,0)',
+                                                penColor: 'rgb(0, 0, 0)',
+                                                minWidth: 1,
+                                                maxWidth: 3
                                             });
+                                            window.signaturePads['task-{{ $submissionTask->id }}'] = signaturePad;
+                                            
+                                            // Handle form submission
+                                            var form = canvas.closest('form');
+                                            if (form) {
+                                                form.addEventListener('submit', function(e) {
+                                                    if (signaturePad.isEmpty()) {
+                                                        alert('Please provide a signature.');
+                                                        e.preventDefault();
+                                                        return false;
+                                                    }
+                                                    document.getElementById('signature-input-task-{{ $submissionTask->id }}').value = signaturePad.toDataURL();
+                                                });
+                                            }
+                                        } else {
+                                            console.error('SignaturePad not loaded or canvas not found');
                                         }
                                     });
+                                    
+                                    // Clear signature function
                                     window.clearSignaturePad = function(key) {
-                                        if (window.signaturePads[key]) {
+                                        if (window.signaturePads && window.signaturePads[key]) {
                                             window.signaturePads[key].clear();
                                         }
                                     }
                                 </script>
-                                @endpush
                             @endif
 
                             <div class="flex justify-end">
@@ -282,18 +295,34 @@
                     </div>
                     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
                     <script>
-                        var canvasFinal = document.getElementById('signature-pad-final');
-                        var signaturePadFinal = new SignaturePad(canvasFinal, { backgroundColor: 'rgba(255,255,255,0)' });
-                        function clearSignaturePadFinal() {
-                            signaturePadFinal.clear();
-                        }
-                        document.querySelector('form[action="{{ route('employee.submissions.complete', $submission) }}"]')?.addEventListener('submit', function(e) {
-                            if (signaturePadFinal.isEmpty()) {
-                                e.preventDefault();
-                                alert('Please provide a signature.');
-                                return false;
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var canvasFinal = document.getElementById('signature-pad-final');
+                            if (canvasFinal && typeof SignaturePad !== 'undefined') {
+                                var signaturePadFinal = new SignaturePad(canvasFinal, { 
+                                    backgroundColor: 'rgba(255,255,255,0)',
+                                    penColor: 'rgb(0, 0, 0)',
+                                    minWidth: 1,
+                                    maxWidth: 3
+                                });
+                                
+                                window.clearSignaturePadFinal = function() {
+                                    signaturePadFinal.clear();
+                                }
+                                
+                                var form = document.querySelector('form[action="{{ route('employee.submissions.complete', $submission) }}"]');
+                                if (form) {
+                                    form.addEventListener('submit', function(e) {
+                                        if (signaturePadFinal.isEmpty()) {
+                                            e.preventDefault();
+                                            alert('Please provide a signature.');
+                                            return false;
+                                        }
+                                        document.getElementById('signature-input-final').value = signaturePadFinal.toDataURL();
+                                    });
+                                }
+                            } else {
+                                console.error('SignaturePad not loaded or canvas not found');
                             }
-                            document.getElementById('signature-input-final').value = signaturePadFinal.toDataURL();
                         });
                     </script>
                 @endif

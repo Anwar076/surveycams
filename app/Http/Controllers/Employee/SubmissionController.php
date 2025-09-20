@@ -54,10 +54,36 @@ class SubmissionController extends Controller
             abort(403, 'You do not have access to this task list.');
         }
 
-        // Laad ALLE taken van de lijst, ongeacht assignment
-        $list->load(['tasks' => function ($query) {
-            $query->where('is_active', true);
-        }]);
+        // Load tasks based on weekly structure
+        if ($list->hasWeeklyStructure()) {
+            // Debug: Log the weekly structure check
+            \Log::info('Weekly structure list detected', [
+                'list_id' => $list->id,
+                'list_title' => $list->title,
+                'hasWeeklyStructure' => $list->hasWeeklyStructure(),
+                'schedule_config' => $list->schedule_config
+            ]);
+            
+            // For weekly structure lists, only show tasks for today's weekday
+            $todayWeekday = strtolower(now()->format('l')); // monday, tuesday, etc.
+            
+            \Log::info('Today weekday', ['today' => $todayWeekday]);
+            
+            $list->load(['tasks' => function ($query) use ($todayWeekday) {
+                $query->where('is_active', true)
+                      ->where(function ($q) use ($todayWeekday) {
+                          $q->where('weekday', $todayWeekday)  // Tasks for today
+                            ->orWhereNull('weekday');           // General tasks (no specific day)
+                      });
+            }]);
+            
+            \Log::info('Tasks loaded', ['task_count' => $list->tasks->count()]);
+        } else {
+            // For regular lists, load all active tasks
+            $list->load(['tasks' => function ($query) {
+                $query->where('is_active', true);
+            }]);
+        }
         
         // Check if user has already started this list today
         $existingSubmission = Submission::where('user_id', $user->id)
@@ -104,7 +130,24 @@ class SubmissionController extends Controller
         ]);
 
         // Create submission tasks for each task in the list
-        foreach ($list->tasks as $task) {
+        // Load tasks with proper filtering for weekly structure lists
+        if ($list->hasWeeklyStructure()) {
+            // For weekly structure lists, only include tasks for today's weekday or general tasks
+            $todayWeekday = strtolower(now()->format('l')); // monday, tuesday, etc.
+            
+            $tasks = $list->tasks()
+                ->where('is_active', true)
+                ->where(function ($query) use ($todayWeekday) {
+                    $query->where('weekday', $todayWeekday)  // Tasks for today
+                          ->orWhereNull('weekday');           // General tasks (no specific day)
+                })
+                ->get();
+        } else {
+            // For regular lists, include all active tasks
+            $tasks = $list->tasks()->where('is_active', true)->get();
+        }
+        
+        foreach ($tasks as $task) {
             SubmissionTask::create([
                 'submission_id' => $submission->id,
                 'task_id' => $task->id,

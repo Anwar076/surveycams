@@ -28,9 +28,11 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::resource('lists', TaskListController::class);
     Route::resource('lists.tasks', TaskController::class)->shallow();
     Route::resource('users', UserController::class);
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
     
     // Additional admin routes
     Route::post('/lists/{list}/assign', [TaskListController::class, 'assign'])->name('lists.assign');
+    Route::delete('/assignments/{assignment}', [TaskListController::class, 'removeAssignment'])->name('assignments.destroy');
     Route::get('/submissions', [TaskListController::class, 'submissions'])->name('submissions.index');
     Route::get('/submissions/{submission}', [TaskListController::class, 'showSubmission'])->name('submissions.show');
     Route::post('/submissions/{submission}/review', [TaskListController::class, 'reviewSubmission'])->name('submissions.review');

@@ -12,8 +12,18 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->wantsJson()) {
+            $users = User::where('role', 'employee')
+                ->where('is_active', true)
+                ->select('id', 'name', 'department', 'email')
+                ->orderBy('name')
+                ->get();
+            
+            return response()->json(['users' => $users]);
+        }
+        
         return view('admin.users.index');
     }
 
