@@ -8,87 +8,102 @@
     <title>{{ config('app.name', 'Laravel') }} - Admin Portal</title>
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
-    
-    <!-- Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Additional Meta Tags -->
-    <meta name="theme-color" content="#1e40af">
+    <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
-<body class="font-sans antialiased bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+<body class="font-sans antialiased bg-gray-50">
     <div class="min-h-screen flex">
-        <!-- Enhanced Sidebar -->
-        <div class="hidden md:flex md:w-72 md:flex-col">
-            <div class="flex flex-col flex-grow pt-6 overflow-y-auto bg-white/90 backdrop-blur-md shadow-xl border-r border-slate-200/50">
-                <!-- Enhanced Logo -->
+        <!-- Clean Sidebar -->
+        <div class="hidden md:flex md:w-64 md:flex-col">
+            <div class="flex flex-col flex-grow pt-6 overflow-y-auto bg-white shadow-lg border-r border-gray-200">
+                <!-- Clean Logo -->
                 <div class="flex items-center flex-shrink-0 px-6 mb-8">
                     <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg">
-                            <i class="fas fa-tasks text-white text-lg"></i>
+                        <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                            </svg>
                         </div>
                         <div>
-                            <h1 class="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">TaskCheck</h1>
-                            <p class="text-xs text-slate-500 font-medium">Admin Portal</p>
+                            <h1 class="text-xl font-bold text-gray-900">TaskCheck</h1>
+                            <p class="text-xs text-gray-500 font-medium">Admin Portal</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Enhanced Navigation -->
-                <nav class="flex-1 px-4 space-y-2">
+                <!-- Clean Navigation -->
+                <nav class="flex-1 px-4 space-y-1">
                     <a href="{{ route('admin.dashboard') }}" 
-                       class="group flex items-center px-4 py-3 text-sm font-semibold rounded-2xl transition-all duration-300 {{ request()->routeIs('admin.dashboard') ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
-                        <i class="fas fa-chart-pie mr-3 text-sm {{ request()->routeIs('admin.dashboard') ? 'text-white' : 'text-slate-500' }}"></i>
+                       class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin.dashboard') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                        </svg>
                         Dashboard
                     </a>
                     
                     <a href="{{ route('admin.lists.index') }}" 
-                       class="group flex items-center px-4 py-3 text-sm font-semibold rounded-2xl transition-all duration-300 {{ request()->routeIs('admin.lists.*') ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
-                        <i class="fas fa-list-ul mr-3 text-sm {{ request()->routeIs('admin.lists.*') ? 'text-white' : 'text-slate-500' }}"></i>
+                       class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.lists.*') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin.lists.*') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
                         Task Lists
                     </a>
                     
                     <a href="{{ route('admin.submissions.index') }}" 
-                       class="group flex items-center px-4 py-3 text-sm font-semibold rounded-2xl transition-all duration-300 {{ request()->routeIs('admin.submissions.*') ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
-                        <i class="fas fa-paper-plane mr-3 text-sm {{ request()->routeIs('admin.submissions.*') ? 'text-white' : 'text-slate-500' }}"></i>
+                       class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.submissions.*') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin.submissions.*') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
                         Submissions
                     </a>
                     
                     <a href="{{ route('admin.users.index') }}" 
-                       class="group flex items-center px-4 py-3 text-sm font-semibold rounded-2xl transition-all duration-300 {{ request()->routeIs('admin.users.*') ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
-                        <i class="fas fa-users mr-3 text-sm {{ request()->routeIs('admin.users.*') ? 'text-white' : 'text-slate-500' }}"></i>
+                       class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.users.*') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin.users.*') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
                         Users
                     </a>
                     
                     <a href="{{ route('admin.weekly-overview') }}" 
-                       class="group flex items-center px-4 py-3 text-sm font-semibold rounded-2xl transition-all duration-300 {{ request()->routeIs('admin.weekly-overview') ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
-                        <i class="fas fa-calendar-week mr-3 text-sm {{ request()->routeIs('admin.weekly-overview') ? 'text-white' : 'text-slate-500' }}"></i>
+                       class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.weekly-overview') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin.weekly-overview') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
                         Weekly Overview
                     </a>
                 </nav>
 
-                <!-- Enhanced User section -->
-                <div class="flex-shrink-0 border-t border-slate-200/50 p-6">
+                <!-- Clean User section -->
+                <div class="flex-shrink-0 border-t border-gray-200 p-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
-                            <div class="w-12 h-12 bg-gradient-to-br from-slate-500 to-slate-700 rounded-2xl flex items-center justify-center shadow-lg">
-                                <i class="fas fa-user text-white text-sm"></i>
+                            <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-medium">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-bold text-slate-900 truncate">{{ Auth::user()->name }}</p>
-                                <p class="text-xs text-slate-500 font-medium">Administrator</p>
+                                <div class="font-medium text-gray-900">{{ Auth::user()->name }}</div>
+                                <div class="text-xs text-gray-500">Administrator</div>
                             </div>
                         </div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="p-3 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-300" title="Logout">
-                                <i class="fas fa-sign-out-alt text-sm"></i>
+                            <button type="submit" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Logout">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                Logout
                             </button>
                         </form>
                     </div>
@@ -96,72 +111,81 @@
             </div>
         </div>
 
-        <!-- Enhanced Main content -->
+        <!-- Clean Main content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Enhanced Top navigation -->
-            <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/50 px-6 py-4 shadow-sm">
+            <!-- Clean Top navigation -->
+            <header class="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
                 <div class="flex items-center justify-between">
-                    <!-- Enhanced Mobile menu button -->
-                    <button class="md:hidden p-3 rounded-2xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-300" id="mobile-menu-button">
-                        <i class="fas fa-bars text-lg"></i>
+                    <!-- Mobile menu button -->
+                    <button class="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors" id="mobile-menu-button">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
                     </button>
                     
-                    <!-- Enhanced Breadcrumb -->
+                    <!-- Breadcrumb -->
                     <div class="hidden md:flex items-center space-x-3 text-sm">
-                        <div class="flex items-center space-x-2 text-slate-500">
-                            <i class="fas fa-home text-sm"></i>
+                        <div class="flex items-center space-x-2 text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
                             <span>/</span>
-                            <span class="text-slate-900 font-semibold">@yield('page-title', 'Dashboard')</span>
+                            <span class="text-gray-900 font-semibold">@yield('page-title', 'Dashboard')</span>
                         </div>
                     </div>
 
-                    <!-- Enhanced Actions -->
+                    <!-- Actions -->
                     <div class="flex items-center space-x-3">
-                        <button class="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all duration-300" title="Notifications">
-                            <i class="fas fa-bell text-lg"></i>
+                        <button class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Notifications">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5z"></path>
+                            </svg>
                         </button>
-                        <button class="p-3 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-2xl transition-all duration-300" title="Settings">
-                            <i class="fas fa-cog text-lg"></i>
+                        <button class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" title="Settings">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
                         </button>
                     </div>
                 </div>
             </header>
 
-            <!-- Enhanced Page content -->
-            <main class="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+            <!-- Clean Page content -->
+            <main class="flex-1 overflow-y-auto bg-gray-50">
                 <div class="p-6">
-                    <!-- Enhanced Flash Messages -->
+                    <!-- Flash Messages -->
                     @if (session('success'))
-                        <div class="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-4 shadow-lg animate-slide-down">
+                        <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-green-100 rounded-2xl flex items-center justify-center mr-3">
-                                    <i class="fas fa-check-circle text-green-600"></i>
-                                </div>
-                                <p class="text-green-800 font-semibold">{{ session('success') }}</p>
+                                <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="text-green-800 font-medium">{{ session('success') }}</p>
                             </div>
                         </div>
                     @endif
 
                     @if (session('error'))
-                        <div class="mb-6 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl p-4 shadow-lg animate-slide-down">
+                        <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center mr-3">
-                                    <i class="fas fa-exclamation-circle text-red-600"></i>
-                                </div>
-                                <p class="text-red-800 font-semibold">{{ session('error') }}</p>
+                                <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="text-red-800 font-medium">{{ session('error') }}</p>
                             </div>
                         </div>
                     @endif
 
-                    <!-- Enhanced Page header -->
+                    <!-- Page header -->
                     @hasSection('header')
                         <div class="mb-8">
                             @yield('header')
                         </div>
                     @endif
 
-                    <!-- Enhanced Content -->
-                    <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50">
+                    <!-- Content -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                         @yield('content')
                     </div>
                 </div>
@@ -169,10 +193,10 @@
         </div>
     </div>
 
-    <!-- Enhanced Mobile menu overlay -->
+    <!-- Mobile menu overlay -->
     <div class="md:hidden fixed inset-0 z-50 hidden" id="mobile-menu-overlay">
-        <div class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm"></div>
-        <div class="fixed inset-y-0 left-0 w-80 bg-white/95 backdrop-blur-md shadow-2xl">
+        <div class="fixed inset-0 bg-gray-900/75"></div>
+        <div class="fixed inset-y-0 left-0 w-80 bg-white shadow-2xl">
             <!-- Mobile menu content -->
             <div class="flex flex-col h-full">
                 <!-- Mobile Logo -->
@@ -182,63 +206,78 @@
                             <i class="fas fa-tasks text-white text-sm"></i>
                         </div>
                         <div>
-                            <h1 class="text-lg font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">TaskCheck</h1>
-                            <p class="text-xs text-slate-500 font-medium">Admin Portal</p>
+                            <h1 class="text-lg font-bold text-gray-900">TaskCheck</h1>
+                            <p class="text-xs text-gray-500 font-medium">Admin Portal</p>
                         </div>
                     </div>
-                    <button class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all duration-300" id="close-mobile-menu">
-                        <i class="fas fa-times text-lg"></i>
+                    <button class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" id="close-mobile-menu">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
 
                 <!-- Mobile Navigation -->
-                <nav class="flex-1 px-4 py-6 space-y-2">
+                <nav class="flex-1 px-4 py-6 space-y-1">
                     <a href="{{ route('admin.dashboard') }}" 
-                       class="flex items-center px-4 py-3 text-base font-semibold rounded-2xl transition-all duration-300 {{ request()->routeIs('admin.dashboard') ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
-                        <i class="fas fa-chart-pie mr-3 text-sm {{ request()->routeIs('admin.dashboard') ? 'text-white' : 'text-slate-500' }}"></i>
+                       class="flex items-center px-3 py-2 text-base font-medium rounded-lg transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin.dashboard') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                        </svg>
                         Dashboard
                     </a>
                     
                     <a href="{{ route('admin.lists.index') }}" 
-                       class="flex items-center px-4 py-3 text-base font-semibold rounded-2xl transition-all duration-300 {{ request()->routeIs('admin.lists.*') ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
-                        <i class="fas fa-list-ul mr-3 text-sm {{ request()->routeIs('admin.lists.*') ? 'text-white' : 'text-slate-500' }}"></i>
+                       class="flex items-center px-3 py-2 text-base font-medium rounded-lg transition-colors {{ request()->routeIs('admin.lists.*') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin.lists.*') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
                         Task Lists
                     </a>
                     
                     <a href="{{ route('admin.submissions.index') }}" 
-                       class="flex items-center px-4 py-3 text-base font-semibold rounded-2xl transition-all duration-300 {{ request()->routeIs('admin.submissions.*') ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
-                        <i class="fas fa-paper-plane mr-3 text-sm {{ request()->routeIs('admin.submissions.*') ? 'text-white' : 'text-slate-500' }}"></i>
+                       class="flex items-center px-3 py-2 text-base font-medium rounded-lg transition-colors {{ request()->routeIs('admin.submissions.*') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin.submissions.*') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
                         Submissions
                     </a>
                     
                     <a href="{{ route('admin.users.index') }}" 
-                       class="flex items-center px-4 py-3 text-base font-semibold rounded-2xl transition-all duration-300 {{ request()->routeIs('admin.users.*') ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
-                        <i class="fas fa-users mr-3 text-sm {{ request()->routeIs('admin.users.*') ? 'text-white' : 'text-slate-500' }}"></i>
+                       class="flex items-center px-3 py-2 text-base font-medium rounded-lg transition-colors {{ request()->routeIs('admin.users.*') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin.users.*') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
                         Users
                     </a>
                     
                     <a href="{{ route('admin.weekly-overview') }}" 
-                       class="flex items-center px-4 py-3 text-base font-semibold rounded-2xl transition-all duration-300 {{ request()->routeIs('admin.weekly-overview') ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
-                        <i class="fas fa-calendar-week mr-3 text-sm {{ request()->routeIs('admin.weekly-overview') ? 'text-white' : 'text-slate-500' }}"></i>
+                       class="flex items-center px-3 py-2 text-base font-medium rounded-lg transition-colors {{ request()->routeIs('admin.weekly-overview') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin.weekly-overview') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
                         Weekly Overview
                     </a>
                 </nav>
 
                 <!-- Mobile User section -->
-                <div class="border-t border-slate-200/50 p-6">
+                <div class="border-t border-gray-200 p-6">
                     <div class="flex items-center space-x-3 mb-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-slate-500 to-slate-700 rounded-2xl flex items-center justify-center shadow-lg">
-                            <i class="fas fa-user text-white text-sm"></i>
+                        <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-medium">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                         </div>
                         <div>
-                            <p class="text-sm font-bold text-slate-900">{{ Auth::user()->name }}</p>
-                            <p class="text-xs text-slate-500 font-medium">Administrator</p>
+                            <p class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</p>
+                            <p class="text-xs text-gray-500">Administrator</p>
                         </div>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="w-full flex items-center justify-center px-4 py-3 text-base font-semibold text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-300 border border-red-200 hover:border-red-300">
-                            <i class="fas fa-sign-out-alt mr-2 text-sm"></i>
+                        <button type="submit" class="w-full flex items-center justify-center px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
                             Logout
                         </button>
                     </form>
@@ -247,9 +286,9 @@
         </div>
     </div>
 
-    <!-- Enhanced JavaScript -->
+    <!-- Clean JavaScript -->
     <script>
-        // Enhanced Mobile menu toggle with animations
+        // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
@@ -258,25 +297,10 @@
             if (mobileMenuButton && mobileMenuOverlay) {
                 mobileMenuButton.addEventListener('click', function() {
                     mobileMenuOverlay.classList.remove('hidden');
-                    
-                    // Add smooth animation
-                    mobileMenuOverlay.style.opacity = '0';
-                    mobileMenuOverlay.style.transform = 'translateX(-100%)';
-                    mobileMenuOverlay.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
-                    
-                    requestAnimationFrame(() => {
-                        mobileMenuOverlay.style.opacity = '1';
-                        mobileMenuOverlay.style.transform = 'translateX(0)';
-                    });
                 });
 
-                // Close mobile menu
                 function closeMenu() {
-                    mobileMenuOverlay.style.opacity = '0';
-                    mobileMenuOverlay.style.transform = 'translateX(-100%)';
-                    setTimeout(() => {
-                        mobileMenuOverlay.classList.add('hidden');
-                    }, 300);
+                    mobileMenuOverlay.classList.add('hidden');
                 }
 
                 if (closeMobileMenu) {
@@ -297,119 +321,18 @@
                 });
             }
 
-            // Enhanced flash messages with better animations
-            const flashMessages = document.querySelectorAll('.bg-gradient-to-r.animate-slide-down');
+            // Auto-hide flash messages
+            const flashMessages = document.querySelectorAll('.bg-green-50, .bg-red-50');
             flashMessages.forEach(function(message) {
-                // Only apply auto-hide to actual flash messages
                 setTimeout(function() {
-                    message.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                    message.style.transition = 'opacity 0.5s ease-out';
                     message.style.opacity = '0';
-                    message.style.transform = 'translateY(-10px)';
                     setTimeout(function() {
                         message.remove();
                     }, 500);
                 }, 5000);
             });
-
-            // Add smooth scroll behavior
-            document.documentElement.style.scrollBehavior = 'smooth';
-
-            // Add touch feedback for mobile interactions
-            document.addEventListener('touchstart', function(e) {
-                if (e.target.closest('button, a')) {
-                    e.target.closest('button, a').style.transform = 'scale(0.98)';
-                }
-            });
-
-            document.addEventListener('touchend', function(e) {
-                if (e.target.closest('button, a')) {
-                    setTimeout(() => {
-                        e.target.closest('button, a').style.transform = '';
-                    }, 150);
-                }
-            });
-
-            // Add loading states for form submissions
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function() {
-                    const submitButton = form.querySelector('button[type="submit"]');
-                    if (submitButton) {
-                        submitButton.disabled = true;
-                        const originalText = submitButton.innerHTML;
-                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-                        
-                        // Re-enable after 5 seconds as fallback
-                        setTimeout(() => {
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = originalText;
-                        }, 5000);
-                    }
-                });
-            });
-
-            // Add intersection observer for scroll animations
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, observerOptions);
-
-            // Observe elements for scroll animations
-            const animatedElements = document.querySelectorAll('.animate-slide-down');
-            animatedElements.forEach(element => {
-                element.style.opacity = '0';
-                element.style.transform = 'translateY(-20px)';
-                element.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-                observer.observe(element);
-            });
         });
-
-        // Add CSS animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slide-down {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            
-            .animate-slide-down {
-                animation: slide-down 0.6s ease-out;
-            }
-            
-            /* Smooth transitions for all interactive elements */
-            button, a, input, select, textarea {
-                transition: all 0.2s ease-in-out;
-            }
-            
-            /* Enhanced focus states */
-            button:focus, a:focus, input:focus, select:focus, textarea:focus {
-                outline: 2px solid #3b82f6;
-                outline-offset: 2px;
-            }
-            
-            /* Mobile-specific improvements */
-            @media (max-width: 768px) {
-                .mobile-menu {
-                    backdrop-filter: blur(10px);
-                }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>

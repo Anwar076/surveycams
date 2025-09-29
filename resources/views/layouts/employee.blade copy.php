@@ -9,7 +9,7 @@
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700&display=swap" rel="stylesheet" />
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -205,21 +205,21 @@
             </div>
         </main>
 
-        <!-- Minimal Footer -->
-        <footer class="bg-white border-t border-gray-200 py-8 mt-16">
+        <!-- Clean Footer -->
+        <footer class="bg-white border-t border-gray-200 py-6 mt-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center">
-                    <div class="flex items-center justify-center mb-2">
-                        <div class="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center justify-center mb-3">
+                        <div class="h-6 w-6 bg-blue-600 rounded flex items-center justify-center mr-2">
+                            <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
                         </div>
-                        <span class="text-lg font-semibold text-gray-900">
+                        <span class="text-sm font-medium text-gray-900">
                             TaskCheck
                         </span>
                     </div>
-                    <p class="text-sm text-gray-500">&copy; {{ date('Y') }} TaskCheck. All rights reserved.</p>
+                    <p class="text-xs text-gray-500">&copy; {{ date('Y') }} TaskCheck. All rights reserved.</p>
                 </div>
             </div>
         </footer>
