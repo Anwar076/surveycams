@@ -5,20 +5,20 @@
     <!-- Greeting + Progress Section -->
     <div class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <!-- Greeting Content -->
-                <div class="flex-1">
+                <div class="flex-1 min-w-0">
                     <div class="mb-6">
-                        <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 break-words">
                             Good {{ now()->hour < 12 ? 'Morning' : (now()->hour < 17 ? 'Afternoon' : 'Evening') }}, 
                             <span class="text-blue-600">{{ explode(' ', auth()->user()->name)[0] }}</span>
                         </h1>
-                        <p class="text-gray-600 text-lg">{{ now()->format('l, F j, Y') }}</p>
+                        <p class="text-gray-600 text-base sm:text-lg">{{ now()->format('l, F j, Y') }}</p>
                     </div>
                     
                     <!-- Linear Progress Bar -->
-                    <div class="w-full lg:w-96">
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-1">
                             <span class="text-sm font-medium text-gray-700">Today's Progress</span>
                             <span class="text-sm font-bold text-blue-600">
                                 {{ round((($stats['completed_today'] + $stats['in_progress']) / max(($stats['pending_tasks'] + $stats['completed_today'] + $stats['in_progress']), 1)) * 100) }}%
@@ -29,7 +29,7 @@
                                  style="width: {{ round((($stats['completed_today'] + $stats['in_progress']) / max(($stats['pending_tasks'] + $stats['completed_today'] + $stats['in_progress']), 1)) * 100) }}%">
                             </div>
                         </div>
-                        <div class="flex justify-between text-xs text-gray-500 mt-2">
+                        <div class="flex flex-col xs:flex-row xs:justify-between text-xs text-gray-500 mt-2 gap-1">
                             <span>{{ $stats['completed_today'] }} completed</span>
                             <span>{{ $stats['pending_tasks'] }} pending</span>
                         </div>
@@ -39,14 +39,14 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
         <!-- Alerts Section -->
         @if($rejectedTasks->count() > 0 || $notifications->count() > 0)
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2">
             @if($rejectedTasks->count() > 0)
-            <div class="bg-white rounded-xl border border-red-200 overflow-hidden">
+            <div class="bg-white rounded-xl border border-red-200 overflow-hidden flex flex-col h-full">
                 <div class="bg-red-50 border-b border-red-200 p-4">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <div class="flex items-center">
                             <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,15 +60,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="p-4">
+                <div class="p-4 flex-1 flex flex-col">
                     @foreach($rejectedTasks->take(3) as $rejectedTask)
-                    <div class="flex items-start justify-between py-3 border-b border-gray-100 last:border-b-0">
-                        <div class="flex-1">
-                            <h4 class="font-medium text-gray-900">{{ $rejectedTask->task->title }}</h4>
-                            <p class="text-sm text-gray-600">{{ $rejectedTask->submission->taskList->title }}</p>
+                    <div class="flex flex-col xs:flex-row items-start xs:items-center justify-between py-3 border-b border-gray-100 last:border-b-0 gap-2">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-gray-900 truncate">{{ $rejectedTask->task->title }}</h4>
+                            <p class="text-sm text-gray-600 truncate">{{ $rejectedTask->submission->taskList->title }}</p>
                         </div>
                         <a href="{{ route('employee.submissions.edit', $rejectedTask->submission) }}" 
-                           class="ml-4 bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+                           class="mt-2 xs:mt-0 xs:ml-4 bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors whitespace-nowrap">
                             Fix
                         </a>
                     </div>
@@ -83,9 +83,9 @@
             @endif
 
             @if($notifications->count() > 0)
-            <div class="bg-white rounded-xl border border-blue-200 overflow-hidden">
+            <div class="bg-white rounded-xl border border-blue-200 overflow-hidden flex flex-col h-full">
                 <div class="bg-blue-50 border-b border-blue-200 p-4">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <div class="flex items-center">
                             <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,18 +98,18 @@
                             </div>
                         </div>
                         <a href="{{ route('employee.notifications.index') }}" 
-                           class="text-sm text-blue-600 hover:text-blue-700 font-medium">View all</a>
+                           class="text-sm text-blue-600 hover:text-blue-700 font-medium mt-2 sm:mt-0">View all</a>
                     </div>
                 </div>
-                <div class="p-4">
+                <div class="p-4 flex-1 flex flex-col">
                     @foreach($notifications->take(3) as $notification)
-                    <div class="flex items-start justify-between py-3 border-b border-gray-100 last:border-b-0">
-                        <div class="flex-1">
-                            <h4 class="font-medium text-gray-900">{{ $notification->title }}</h4>
-                            <p class="text-sm text-gray-600">{{ Str::limit($notification->message, 60) }}</p>
+                    <div class="flex flex-col xs:flex-row items-start xs:items-center justify-between py-3 border-b border-gray-100 last:border-b-0 gap-2">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-gray-900 truncate">{{ $notification->title }}</h4>
+                            <p class="text-sm text-gray-600 truncate">{{ Str::limit($notification->message, 60) }}</p>
                         </div>
                         <button onclick="markNotificationAsRead({{ $notification->id }})" 
-                                class="ml-4 bg-blue-600 text-white p-1 rounded-lg hover:bg-blue-700 transition-colors">
+                                class="mt-2 xs:mt-0 xs:ml-4 bg-blue-600 text-white p-1 rounded-lg hover:bg-blue-700 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
@@ -123,12 +123,12 @@
         @endif
 
         <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-3">
             <!-- Today's Tasks -->
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100 p-6">
-                        <div class="flex items-center justify-between">
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100 p-4 sm:p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div class="flex items-center">
                                 <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center mr-4">
                                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,19 +136,19 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="text-xl font-bold text-gray-900">Today's Tasks</h3>
-                                    <p class="text-gray-600">{{ $todaysLists->count() }} lists assigned</p>
+                                    <h3 class="text-lg sm:text-xl font-bold text-gray-900">Today's Tasks</h3>
+                                    <p class="text-gray-600 text-sm sm:text-base">{{ $todaysLists->count() }} lists assigned</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         @forelse($todaysLists as $list)
-                        <div class="bg-gray-50 rounded-xl p-6 mb-6 last:mb-0 hover:bg-gray-100 transition-colors duration-200">
-                            <div class="flex items-start justify-between mb-4">
-                                <div class="flex-1">
-                                    <h4 class="text-xl font-bold text-gray-900 mb-2">{{ $list->title }}</h4>
-                                    <p class="text-gray-600 mb-4">{{ Str::limit($list->description, 120) }}</p>
+                        <div class="bg-gray-50 rounded-xl p-4 sm:p-6 mb-6 last:mb-0 hover:bg-gray-100 transition-colors duration-200">
+                            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-4">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 break-words">{{ $list->title }}</h4>
+                                    <p class="text-gray-600 mb-4 break-words">{{ Str::limit($list->description, 120) }}</p>
                                     
                                     <div class="flex flex-wrap gap-2 mb-4">
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
@@ -181,7 +181,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                 </svg>
                                             </div>
-                                            <span class="text-sm text-gray-700">{{ $task->title }}</span>
+                                            <span class="text-sm text-gray-700 truncate">{{ $task->title }}</span>
                                         </div>
                                         @endforeach
                                         @if($list->tasks->count() > 3)
@@ -193,23 +193,23 @@
                                     @endif
                                 </div>
                                 <a href="{{ route('employee.lists.show', $list) }}" 
-                                   class="ml-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center group">
+                                   class="mt-4 md:mt-0 md:ml-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center group w-full md:w-auto justify-center">
                                     <svg class="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                     </svg>
-                                    Start Task
+                                    <span class="truncate">Start Task</span>
                                 </a>
                             </div>
                         </div>
                         @empty
-                        <div class="text-center py-16">
-                            <div class="w-20 h-20 mx-auto bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                                <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="text-center py-12 sm:py-16">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
+                                <svg class="w-8 h-8 sm:w-10 sm:h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-2xl font-bold text-gray-900 mb-3">All done for today!</h3>
-                            <p class="text-gray-600 text-lg">You've completed all your assigned tasks. Great work!</p>
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">All done for today!</h3>
+                            <p class="text-gray-600 text-base sm:text-lg">You've completed all your assigned tasks. Great work!</p>
                         </div>
                         @endforelse
                     </div>
@@ -219,7 +219,7 @@
             <!-- Recent Activity Timeline -->
             <div>
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                    <div class="bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-100 p-6">
+                    <div class="bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-100 p-4 sm:p-6">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-gray-600 rounded-xl flex items-center justify-center mr-4">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,12 +227,12 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold text-gray-900">Recent Activity</h3>
-                                <p class="text-gray-600">Your latest submissions</p>
+                                <h3 class="text-lg sm:text-xl font-bold text-gray-900">Recent Activity</h3>
+                                <p class="text-gray-600 text-sm sm:text-base">Your latest submissions</p>
                             </div>
                         </div>
                     </div>
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         @forelse($recentSubmissions as $index => $submission)
                         <div class="timeline-item relative {{ $index !== $recentSubmissions->count() - 1 ? 'pb-6' : '' }}">
                             @if($index !== $recentSubmissions->count() - 1)
@@ -253,8 +253,8 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <h4 class="font-semibold text-gray-900 mb-1">{{ $submission->taskList->title }}</h4>
-                                    <p class="text-sm text-gray-600 mb-2">
+                                    <h4 class="font-semibold text-gray-900 mb-1 truncate">{{ $submission->taskList->title }}</h4>
+                                    <p class="text-sm text-gray-600 mb-2 truncate">
                                         {{ $submission->completed_at ? 'Completed ' . $submission->completed_at->diffForHumans() : 'Started ' . $submission->created_at->diffForHumans() }}
                                     </p>
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
@@ -268,14 +268,14 @@
                             </div>
                         </div>
                         @empty
-                        <div class="text-center py-12 text-gray-500">
-                            <div class="w-16 h-16 mx-auto bg-gray-100 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="text-center py-8 sm:py-12 text-gray-500">
+                            <div class="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-gray-100 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 shadow-lg">
+                                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
-                            <p class="text-lg font-medium">No recent activity</p>
-                            <p class="text-sm">Start working on tasks to see progress here</p>
+                            <p class="text-base sm:text-lg font-medium">No recent activity</p>
+                            <p class="text-xs sm:text-sm">Start working on tasks to see progress here</p>
                         </div>
                         @endforelse
                     </div>
@@ -285,16 +285,16 @@
 
         <!-- Subtle Success Message -->
         @if($stats['completed_today'] > 0)
-        <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-8">
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4 sm:p-6 mb-8">
             <div class="flex items-center">
-                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold text-green-900">Great progress today!</h3>
-                    <p class="text-green-700">
+                    <h3 class="text-base sm:text-lg font-semibold text-green-900">Great progress today!</h3>
+                    <p class="text-green-700 text-sm sm:text-base">
                         You've completed {{ $stats['completed_today'] }} 
                         {{ $stats['completed_today'] === 1 ? 'task' : 'tasks' }} so far. 
                         Keep up the excellent work!
@@ -406,6 +406,15 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+/* Responsive helpers for xs (min-width: 375px) */
+@media (min-width: 375px) {
+    .xs\:flex-row { flex-direction: row !important; }
+    .xs\:items-center { align-items: center !important; }
+    .xs\:justify-between { justify-content: space-between !important; }
+    .xs\:mt-0 { margin-top: 0 !important; }
+    .xs\:ml-4 { margin-left: 1rem !important; }
+}
+
 /* Ripple effect styles */
 .ripple {
     position: absolute;
@@ -450,6 +459,16 @@ document.addEventListener('DOMContentLoaded', function() {
     transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
     background: linear-gradient(90deg, #3b82f6, #2563eb);
     box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* Utility for truncating text on small screens */
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.break-words {
+    word-break: break-word;
 }
 </style>
 @endsection
