@@ -13,6 +13,35 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Public pages
+Route::get('/features', function () {
+    return view('features');
+})->name('features');
+
+Route::get('/pricing', function () {
+    return view('pricing');
+})->name('pricing');
+
+Route::get('/about', function () {
+    return view('about');
+})->name('about');
+
+Route::get('/contact', function () {
+    return view('contact');
+})->name('contact');
+
+Route::get('/help', function () {
+    return view('help');
+})->name('help');
+
+Route::get('/privacy', function () {
+    return view('privacy');
+})->name('privacy');
+
+Route::get('/terms', function () {
+    return view('terms');
+})->name('terms');
+
 // Redirect dashboard based on user role
 Route::get('/dashboard', function () {
     if (auth()->user()->isAdmin()) {
