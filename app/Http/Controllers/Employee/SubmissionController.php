@@ -7,11 +7,19 @@ use App\Models\TaskList;
 use App\Models\Submission;
 use App\Models\SubmissionTask;
 use App\Models\ListAssignment;
+use App\Services\ScheduleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class SubmissionController extends Controller
 {
+    protected $scheduleService;
+
+    public function __construct(ScheduleService $scheduleService)
+    {
+        $this->scheduleService = $scheduleService;
+    }
+
     /**
      * Display available task lists for the employee
      */
@@ -19,8 +27,8 @@ class SubmissionController extends Controller
     {
         $user = auth()->user();
         
-        // Get assigned lists
-        $assignedLists = $this->getAssignedLists($user);
+        // Get assigned lists using ScheduleService
+        $assignedLists = $this->scheduleService->getScheduledTasksForUser($user);
         
         // Apply filters
         if ($request->filled('priority')) {
@@ -231,52 +239,10 @@ class SubmissionController extends Controller
             ->with('success', '🎉 Congratulations! You have successfully completed your checklist. Thank you for your hard work!');
     }
 
-    private function getAssignedLists($user)
-    {
-        // Get lists assigned directly to user
-        $directAssignments = ListAssignment::with(['taskList.tasks'])
-            ->where('user_id', $user->id)
-            ->where('assigned_date', '<=', today())
-            ->where('is_active', true)
-            ->whereHas('taskList', function ($query) {
-                $query->where('is_active', true);
-            });
-
-        // Get lists assigned by department
-        $departmentAssignments = ListAssignment::with(['taskList.tasks'])
-            ->where('department', $user->department)
-            ->where('assigned_date', '<=', today())
-            ->where('is_active', true)
-            ->whereHas('taskList', function ($query) {
-                $query->where('is_active', true);
-            });
-
-        // Get lists assigned by role
-        $roleAssignments = ListAssignment::with(['taskList.tasks'])
-            ->where('role', $user->role)
-            ->where('assigned_date', '<=', today())
-            ->where('is_active', true)
-            ->whereHas('taskList', function ($query) {
-                $query->where('is_active', true);
-            });
-
-        // Combine all assignments and remove duplicates
-        return $directAssignments->get()
-            ->merge($departmentAssignments->get())
-            ->merge($roleAssignments->get())
-            ->unique('list_id')
-            ->pluck('taskList');
-    }
-
     private function userHasAccessToList($user, $list)
     {
-        return ListAssignment::where('list_id', $list->id)
-            ->where(function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                    ->orWhere('department', $user->department)
-                    ->orWhere('role', $user->role);
-            })
-            ->where('is_active', true)
-            ->exists();
+        // Use the ScheduleService to check if the user has access and the list is scheduled
+        $assignedLists = $this->scheduleService->getScheduledTasksForUser($user);
+        return $assignedLists->contains('id', $list->id);
     }
 }

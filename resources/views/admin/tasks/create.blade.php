@@ -7,7 +7,14 @@
         <div class="flex justify-between items-center">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Add Task</h1>
-                <p class="mt-1 text-sm text-gray-600">Add a new task to "{{ $list->title }}"</p>
+                <p class="mt-1 text-sm text-gray-600">
+                    Add a new task to "{{ $list->title }}"
+                    @if(isset($selectedWeekday))
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                            {{ ucfirst($selectedWeekday) }}
+                        </span>
+                    @endif
+                </p>
             </div>
             <a href="{{ route('admin.lists.show', $list) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                 Cancel
@@ -19,6 +26,10 @@
     <div class="bg-white shadow rounded-lg">
         <form method="POST" action="{{ route('admin.lists.tasks.store', $list) }}" class="space-y-6 p-6">
             @csrf
+            
+            @if(isset($targetList) && $targetList->id !== $list->id)
+                <input type="hidden" name="target_list_id" value="{{ $targetList->id }}">
+            @endif
 
             <!-- Basic Information -->
             <div class="grid grid-cols-1 gap-6">

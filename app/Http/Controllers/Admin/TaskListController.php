@@ -47,6 +47,15 @@ class TaskListController extends Controller
             'parent_list_id' => 'nullable|exists:lists,id',
             'schedule_type' => 'required|in:once,daily,weekly,monthly,custom',
             'schedule_config' => 'nullable|array',
+            'schedule_config.weekdays' => 'nullable|array',
+            'schedule_config.weekdays.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'schedule_config.day_of_month' => 'nullable|integer|between:1,31',
+            'schedule_config.type' => 'nullable|in:specific_days,interval,date_range',
+            'schedule_config.days' => 'nullable|array',
+            'schedule_config.days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'schedule_config.interval_days' => 'nullable|integer|min:1|max:365',
+            'schedule_config.start_date' => 'nullable|date',
+            'schedule_config.end_date' => 'nullable|date|after_or_equal:schedule_config.start_date',
             'priority' => 'required|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'tags' => 'nullable|array',
@@ -56,6 +65,46 @@ class TaskListController extends Controller
             'is_active' => 'boolean',
             'create_daily_sublists' => 'boolean',
         ]);
+
+        // Clean up schedule_config based on schedule_type
+        if (isset($validated['schedule_config'])) {
+            switch ($validated['schedule_type']) {
+                case 'once':
+                case 'daily':
+                    $validated['schedule_config'] = null;
+                    break;
+                case 'weekly':
+                    $validated['schedule_config'] = [
+                        'weekdays' => $validated['schedule_config']['weekdays'] ?? []
+                    ];
+                    break;
+                case 'monthly':
+                    $validated['schedule_config'] = [
+                        'day_of_month' => $validated['schedule_config']['day_of_month'] ?? 1
+                    ];
+                    break;
+                case 'custom':
+                    $config = [];
+                    $type = $validated['schedule_config']['type'] ?? 'specific_days';
+                    $config['type'] = $type;
+                    
+                    switch ($type) {
+                        case 'specific_days':
+                            $config['days'] = $validated['schedule_config']['days'] ?? [];
+                            break;
+                        case 'interval':
+                            $config['interval_days'] = $validated['schedule_config']['interval_days'] ?? 1;
+                            $config['start_date'] = $validated['schedule_config']['start_date'] ?? null;
+                            break;
+                        case 'date_range':
+                            $config['start_date'] = $validated['schedule_config']['start_date'] ?? null;
+                            $config['end_date'] = $validated['schedule_config']['end_date'] ?? null;
+                            break;
+                    }
+                    $validated['schedule_config'] = $config;
+                    break;
+            }
+        }
 
         $validated['created_by'] = auth()->id();
 
@@ -103,6 +152,15 @@ class TaskListController extends Controller
             'parent_list_id' => 'nullable|exists:lists,id',
             'schedule_type' => 'required|in:once,daily,weekly,monthly,custom',
             'schedule_config' => 'nullable|array',
+            'schedule_config.weekdays' => 'nullable|array',
+            'schedule_config.weekdays.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'schedule_config.day_of_month' => 'nullable|integer|between:1,31',
+            'schedule_config.type' => 'nullable|in:specific_days,interval,date_range',
+            'schedule_config.days' => 'nullable|array',
+            'schedule_config.days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'schedule_config.interval_days' => 'nullable|integer|min:1|max:365',
+            'schedule_config.start_date' => 'nullable|date',
+            'schedule_config.end_date' => 'nullable|date|after_or_equal:schedule_config.start_date',
             'priority' => 'required|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'tags' => 'nullable|array',
@@ -112,6 +170,46 @@ class TaskListController extends Controller
             'is_active' => 'boolean',
             'create_daily_sublists' => 'boolean',
         ]);
+
+        // Clean up schedule_config based on schedule_type
+        if (isset($validated['schedule_config'])) {
+            switch ($validated['schedule_type']) {
+                case 'once':
+                case 'daily':
+                    $validated['schedule_config'] = null;
+                    break;
+                case 'weekly':
+                    $validated['schedule_config'] = [
+                        'weekdays' => $validated['schedule_config']['weekdays'] ?? []
+                    ];
+                    break;
+                case 'monthly':
+                    $validated['schedule_config'] = [
+                        'day_of_month' => $validated['schedule_config']['day_of_month'] ?? 1
+                    ];
+                    break;
+                case 'custom':
+                    $config = [];
+                    $type = $validated['schedule_config']['type'] ?? 'specific_days';
+                    $config['type'] = $type;
+                    
+                    switch ($type) {
+                        case 'specific_days':
+                            $config['days'] = $validated['schedule_config']['days'] ?? [];
+                            break;
+                        case 'interval':
+                            $config['interval_days'] = $validated['schedule_config']['interval_days'] ?? 1;
+                            $config['start_date'] = $validated['schedule_config']['start_date'] ?? null;
+                            break;
+                        case 'date_range':
+                            $config['start_date'] = $validated['schedule_config']['start_date'] ?? null;
+                            $config['end_date'] = $validated['schedule_config']['end_date'] ?? null;
+                            break;
+                    }
+                    $validated['schedule_config'] = $config;
+                    break;
+            }
+        }
 
         $list->update($validated);
 
@@ -140,49 +238,64 @@ class TaskListController extends Controller
      */
     public function assign(Request $request, TaskList $list)
     {
+        // Debug: Log all request data
+        \Log::info('Assignment request data:', $request->all());
+        
         $validated = $request->validate([
             'assignment_type' => ['required', Rule::in(['user', 'department', 'role'])],
-            'user_ids' => 'required_if:assignment_type,user|array',
+            'user_ids' => 'required_if:assignment_type,user|array|nullable',
             'user_ids.*' => 'required_if:assignment_type,user|exists:users,id',
-            'department' => 'required_if:assignment_type,department|string',
-            'role' => 'required_if:assignment_type,role|string',
+            'department' => 'required_if:assignment_type,department|string|nullable',
+            'role' => 'required_if:assignment_type,role|string|nullable',
             'assigned_date' => 'required|date',
             'due_date' => 'nullable|date|after_or_equal:assigned_date',
         ]);
 
-        // Remove previous assignments of this type for this list
-        if ($validated['assignment_type'] === 'user') {
-            // Remove all user assignments for this list
-            ListAssignment::where('list_id', $list->id)->whereNotNull('user_id')->delete();
-            foreach ($validated['user_ids'] as $userId) {
+        // Debug: Log validated data
+        \Log::info('Validated assignment data:', $validated);
+        
+        try {
+            // Remove previous assignments of this type for this list
+            if ($validated['assignment_type'] === 'user') {
+                // Remove all user assignments for this list
+                ListAssignment::where('list_id', $list->id)->whereNotNull('user_id')->delete();
+                foreach ($validated['user_ids'] as $userId) {
+                    ListAssignment::create([
+                        'list_id' => $list->id,
+                        'user_id' => $userId,
+                        'assigned_date' => $validated['assigned_date'],
+                        'due_date' => $validated['due_date'],
+                    ]);
+                }
+            } elseif ($validated['assignment_type'] === 'department') {
+                // Remove all department assignments for this list
+                ListAssignment::where('list_id', $list->id)->whereNotNull('department')->delete();
                 ListAssignment::create([
                     'list_id' => $list->id,
-                    'user_id' => $userId,
+                    'department' => $validated['department'],
+                    'assigned_date' => $validated['assigned_date'],
+                    'department' => $validated['department'],
+                    'assigned_date' => $validated['assigned_date'],
+                    'due_date' => $validated['due_date'],
+                ]);
+            } elseif ($validated['assignment_type'] === 'role') {
+                // Remove all role assignments for this list
+                ListAssignment::where('list_id', $list->id)->whereNotNull('role')->delete();
+                ListAssignment::create([
+                    'list_id' => $list->id,
+                    'role' => $validated['role'],
                     'assigned_date' => $validated['assigned_date'],
                     'due_date' => $validated['due_date'],
                 ]);
             }
-        } elseif ($validated['assignment_type'] === 'department') {
-            // Remove all department assignments for this list
-            ListAssignment::where('list_id', $list->id)->whereNotNull('department')->delete();
-            ListAssignment::create([
-                'list_id' => $list->id,
-                'department' => $validated['department'],
-                'assigned_date' => $validated['assigned_date'],
-                'due_date' => $validated['due_date'],
-            ]);
-        } elseif ($validated['assignment_type'] === 'role') {
-            // Remove all role assignments for this list
-            ListAssignment::where('list_id', $list->id)->whereNotNull('role')->delete();
-            ListAssignment::create([
-                'list_id' => $list->id,
-                'role' => $validated['role'],
-                'assigned_date' => $validated['assigned_date'],
-                'due_date' => $validated['due_date'],
-            ]);
+            
+            \Log::info('Assignment successful for list ' . $list->id);
+            return back()->with('success', 'List assigned successfully.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Assignment failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Assignment failed: ' . $e->getMessage()]);
         }
-
-        return back()->with('success', 'List assigned successfully.');
     }
 
     /**
@@ -315,8 +428,11 @@ class TaskListController extends Controller
             return back()->with('error', 'Only main lists can have daily sub-lists.');
         }
 
+        // Update the main list to daily schedule type
+        $list->update(['schedule_type' => 'daily']);
+
         $list->createDailySubLists();
 
-        return back()->with('success', 'Daily sub-lists created successfully.');
+        return back()->with('success', 'Daily sub-lists created successfully. You can now drag and drop tasks to specific days.');
     }
 }

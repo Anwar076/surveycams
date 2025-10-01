@@ -14,10 +14,33 @@ class TaskController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(TaskList $list)
+    public function create(Request $request, TaskList $list)
     {
         $users = User::where('role', 'employee')->where('is_active', true)->get();
-        return view('admin.tasks.create', compact('list', 'users'));
+        $selectedWeekday = $request->get('weekday');
+        
+        // If creating for a specific weekday, find or create the sublist
+        $targetList = $list;
+        if ($selectedWeekday && $list->isMainList()) {
+            $subList = $list->subLists()->where('weekday', $selectedWeekday)->first();
+            if (!$subList) {
+                $subList = $list->subLists()->create([
+                    'title' => $list->title . ' – ' . ucfirst($selectedWeekday),
+                    'description' => $list->description,
+                    'weekday' => $selectedWeekday,
+                    'schedule_type' => 'daily',
+                    'priority' => $list->priority,
+                    'category' => $list->category,
+                    'requires_signature' => $list->requires_signature,
+                    'is_template' => false,
+                    'is_active' => true,
+                    'created_by' => auth()->id(),
+                ]);
+            }
+            $targetList = $subList;
+        }
+        
+        return view('admin.tasks.create', compact('list', 'targetList', 'users', 'selectedWeekday'));
     }
 
     /**
@@ -35,12 +58,22 @@ class TaskController extends Controller
             'order_index' => 'nullable|integer|min:1',
             'assigned_users' => 'nullable|array',
             'assigned_users.*' => 'exists:users,id',
+            'target_list_id' => 'nullable|exists:lists,id', // For weekday specific creation
         ]);
 
-        $validated['list_id'] = $list->id;
+        // Determine the target list (weekday sublist or main list)
+        $targetList = $list;
+        if ($validated['target_list_id'] && $validated['target_list_id'] !== $list->id) {
+            $targetList = TaskList::findOrFail($validated['target_list_id']);
+        }
+
+        $validated['list_id'] = $targetList->id;
         $validated['is_required'] = $request->has('is_required');
         $validated['requires_signature'] = $request->has('requires_signature');
-        $validated['order_index'] = $validated['order_index'] ?? ($list->tasks()->max('order_index') + 1);
+        $validated['order_index'] = $validated['order_index'] ?? ($targetList->tasks()->max('order_index') + 1);
+        
+        // Remove target_list_id from validated data as it's not a Task field
+        unset($validated['target_list_id']);
 
         $task = Task::create($validated);
 
