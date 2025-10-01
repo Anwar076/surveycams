@@ -153,7 +153,7 @@
                         5GB Storage
                     </li>
                 </ul>
-                <button class="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                <button onclick="selectPlan('starter')" class="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
                     Start Free Trial
                 </button>
             </div>
@@ -210,7 +210,7 @@
                         API Access
                     </li>
                 </ul>
-                <button class="w-full btn-gradient text-white py-3 rounded-lg font-semibold">
+                <button onclick="selectPlan('professional')" class="w-full btn-gradient text-white py-3 rounded-lg font-semibold">
                     Start Free Trial
                 </button>
             </div>
@@ -314,7 +314,7 @@
                         Custom Integrations
                     </li>
                 </ul>
-                <button class="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                <button onclick="selectPlan('enterprise')" class="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
                     Contact Sales
                 </button>
             </div>
@@ -454,9 +454,166 @@
         </div>
     </footer>
 
-    <!-- JavaScript for Billing Toggle -->
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-900">Complete Your Subscription</h3>
+                    <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="planDetails" class="mb-6">
+                    <!-- Plan details will be populated here -->
+                </div>
+
+                <form id="paymentForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <input type="email" id="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="fullName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                        <input type="text" id="companyName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" onclick="selectPaymentMethod('card')" class="payment-method p-3 border border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v2h16V6H4zm0 4v6h16v-6H4z"/>
+                                    </svg>
+                                    <span class="text-sm font-medium">Card</span>
+                                </div>
+                            </button>
+                            <button type="button" onclick="selectPaymentMethod('paypal')" class="payment-method p-3 border border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.432-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.543-.68c-.013-.76-.4-1.38-1.057-1.75-.84-.48-2.01-.6-3.13-.6H8.287c-.524 0-.968.382-1.05.9L5.135 19.482h4.944c.524 0 .968-.382 1.05-.9l1.12-7.106h2.19c4.298 0 7.664-1.747 8.647-6.797.03-.144.054-.289.077-.432.292-1.867-.002-3.137-1.012-4.287z"/>
+                                    </svg>
+                                    <span class="text-sm font-medium">PayPal</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="cardDetails" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
+                            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                                <input type="text" id="expiryDate" placeholder="MM/YY" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">CVC</label>
+                                <input type="text" id="cvc" placeholder="123" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        Complete Subscription
+                    </button>
+                </form>
+
+                <div class="mt-4 text-center">
+                    <p class="text-xs text-gray-500">
+                        By subscribing, you agree to our <a href="{{ route('terms') }}" class="text-blue-600 hover:underline">Terms of Service</a> 
+                        and <a href="{{ route('privacy') }}" class="text-blue-600 hover:underline">Privacy Policy</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Billing Toggle and Payment -->
     <script>
+        let selectedPlan = null;
+        let selectedPaymentMethod = null;
+
+        function selectPlan(plan) {
+            selectedPlan = plan;
+            const plans = {
+                starter: {
+                    name: 'Starter',
+                    price: '$29',
+                    period: 'month',
+                    features: ['1 Admin Account', '5 Employee Accounts', 'Basic Task Management', 'Email Support', '5GB Storage']
+                },
+                professional: {
+                    name: 'Professional',
+                    price: '$79',
+                    period: 'month',
+                    features: ['2 Admin Accounts', '10 Employee Accounts', 'Advanced Analytics', 'Priority Support', '50GB Storage', 'API Access']
+                },
+                enterprise: {
+                    name: 'Enterprise',
+                    price: '$149',
+                    period: 'month',
+                    features: ['5 Admin Accounts', '20 Employee Accounts', 'Custom Workflows', '24/7 Phone Support', 'Unlimited Storage', 'Custom Integrations']
+                }
+            };
+
+            const planData = plans[plan];
+            document.getElementById('planDetails').innerHTML = `
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-900 mb-2">${planData.name} Plan</h4>
+                    <div class="text-2xl font-bold text-blue-600 mb-2">${planData.price}<span class="text-sm text-gray-500">/${planData.period}</span></div>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        ${planData.features.map(feature => `<li>• ${feature}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+            selectedPlan = null;
+            selectedPaymentMethod = null;
+            document.getElementById('paymentForm').reset();
+            document.getElementById('cardDetails').classList.add('hidden');
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            
+            // Remove active class from all payment methods
+            document.querySelectorAll('.payment-method').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50');
+                btn.classList.add('border-gray-300');
+            });
+
+            // Add active class to selected method
+            event.target.closest('.payment-method').classList.add('border-blue-500', 'bg-blue-50');
+            event.target.closest('.payment-method').classList.remove('border-gray-300');
+
+            // Show/hide card details
+            if (method === 'card') {
+                document.getElementById('cardDetails').classList.remove('hidden');
+            } else {
+                document.getElementById('cardDetails').classList.add('hidden');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Billing toggle functionality
             const toggle = document.getElementById('billing-toggle');
             const toggleButton = document.getElementById('toggle-button');
             const monthlyPrices = document.querySelectorAll('.monthly-price');
@@ -474,6 +631,47 @@
                     toggleButton.style.transform = 'translateX(0.25rem)';
                     monthlyPrices.forEach(price => price.classList.remove('hidden'));
                     annualPrices.forEach(price => price.classList.add('hidden'));
+                }
+            });
+
+            // Payment form submission
+            document.getElementById('paymentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!selectedPaymentMethod) {
+                    alert('Please select a payment method');
+                    return;
+                }
+
+                if (selectedPaymentMethod === 'card') {
+                    const cardNumber = document.getElementById('cardNumber').value;
+                    const expiryDate = document.getElementById('expiryDate').value;
+                    const cvc = document.getElementById('cvc').value;
+
+                    if (!cardNumber || !expiryDate || !cvc) {
+                        alert('Please fill in all card details');
+                        return;
+                    }
+                }
+
+                // Simulate payment processing
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Processing...';
+                submitBtn.disabled = true;
+
+                setTimeout(() => {
+                    alert('Payment successful! Welcome to TaskCheck. You will receive a confirmation email shortly.');
+                    closePaymentModal();
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }, 2000);
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('paymentModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closePaymentModal();
                 }
             });
         });

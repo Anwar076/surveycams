@@ -73,7 +73,9 @@
                 </div>
                 <span class="text-xl font-extrabold">TaskCheck</span>
             </div>
-            <div class="flex items-center space-x-6">
+            
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-6">
                 <a href="{{ route('features') }}" class="text-gray-700 hover:text-primary-600 font-medium">Features</a>
                 <a href="{{ route('pricing') }}" class="text-gray-700 hover:text-primary-600 font-medium">Pricing</a>
                 <a href="{{ route('about') }}" class="text-gray-700 hover:text-primary-600 font-medium">About</a>
@@ -82,6 +84,33 @@
                         <a href="{{ url('/dashboard') }}" class="text-gray-700 hover:text-primary-600 font-medium">Dashboard</a>
                     @else
                         <a href="{{ route('login') }}" class="btn-gradient text-white px-5 py-2 rounded-lg font-medium">Login</a>
+                    @endauth
+                @endif
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobileMenu" class="md:hidden bg-white border-t border-gray-200 hidden">
+            <div class="px-6 py-4 space-y-4">
+                <a href="{{ route('features') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Features</a>
+                <a href="{{ route('pricing') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Pricing</a>
+                <a href="{{ route('about') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">About</a>
+                <a href="{{ route('blog') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Blog</a>
+                <a href="{{ route('careers') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Careers</a>
+                <a href="{{ route('help') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Help</a>
+                <a href="{{ route('contact') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Contact</a>
+                @if (Route::has('login'))
+                    @auth
+                        <a href="{{ url('/dashboard') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Dashboard</a>
+                    @else
+                        <a href="{{ route('login') }}" class="block btn-gradient text-white px-4 py-2 rounded-lg font-medium text-center">Login</a>
                     @endauth
                 @endif
             </div>
@@ -488,8 +517,8 @@
                     <ul class="space-y-2 text-gray-600">
                         <li><a href="{{ route('features') }}" class="hover:text-blue-600 transition-colors">Features</a></li>
                         <li><a href="{{ route('pricing') }}" class="hover:text-blue-600 transition-colors">Pricing</a></li>
-                        <li><a href="#" class="hover:text-blue-600 transition-colors">Integrations</a></li>
-                        <li><a href="#" class="hover:text-blue-600 transition-colors">API</a></li>
+                        <li><a href="{{ route('integrations') }}" class="hover:text-blue-600 transition-colors">Integrations</a></li>
+                        <li><a href="{{ route('api') }}" class="hover:text-blue-600 transition-colors">API</a></li>
                     </ul>
                 </div>
                 
@@ -497,8 +526,8 @@
                     <h3 class="font-semibold text-gray-900 mb-4">Company</h3>
                     <ul class="space-y-2 text-gray-600">
                         <li><a href="{{ route('about') }}" class="hover:text-blue-600 transition-colors">About</a></li>
-                        <li><a href="#" class="hover:text-blue-600 transition-colors">Blog</a></li>
-                        <li><a href="#" class="hover:text-blue-600 transition-colors">Careers</a></li>
+                        <li><a href="{{ route('blog') }}" class="hover:text-blue-600 transition-colors">Blog</a></li>
+                        <li><a href="{{ route('careers') }}" class="hover:text-blue-600 transition-colors">Careers</a></li>
                         <li><a href="{{ route('contact') }}" class="hover:text-blue-600 transition-colors">Contact</a></li>
                     </ul>
                 </div>
@@ -507,9 +536,9 @@
                     <h3 class="font-semibold text-gray-900 mb-4">Support</h3>
                     <ul class="space-y-2 text-gray-600">
                         <li><a href="{{ route('help') }}" class="hover:text-blue-600 transition-colors">Help Center</a></li>
-                        <li><a href="#" class="hover:text-blue-600 transition-colors">Documentation</a></li>
-                        <li><a href="#" class="hover:text-blue-600 transition-colors">Status</a></li>
-                        <li><a href="#" class="hover:text-blue-600 transition-colors">Security</a></li>
+                        <li><a href="{{ route('documentation') }}" class="hover:text-blue-600 transition-colors">Documentation</a></li>
+                        <li><a href="{{ route('status') }}" class="hover:text-blue-600 transition-colors">Status</a></li>
+                        <li><a href="{{ route('security') }}" class="hover:text-blue-600 transition-colors">Security</a></li>
                     </ul>
                 </div>
             </div>
@@ -545,6 +574,21 @@
                 animateNumber(document.getElementById('live-teams'), 0, 342, 1800);
                 animateNumber(document.getElementById('live-hours'), 0, 2847, 2200);
             }, 1000);
+
+            // Mobile menu functionality
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            mobileMenuBtn.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!mobileMenuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
         });
     </script>
 </body>

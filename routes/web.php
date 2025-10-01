@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 // Public pages
 Route::get('/features', function () {
@@ -42,6 +42,34 @@ Route::get('/terms', function () {
     return view('terms');
 })->name('terms');
 
+Route::get('/status', function () {
+    return view('status');
+})->name('status');
+
+Route::get('/security', function () {
+    return view('security');
+})->name('security');
+
+Route::get('/api', function () {
+    return view('api');
+})->name('api');
+
+Route::get('/integrations', function () {
+    return view('integrations');
+})->name('integrations');
+
+Route::get('/blog', function () {
+    return view('blog');
+})->name('blog');
+
+Route::get('/careers', function () {
+    return view('careers');
+})->name('careers');
+
+Route::get('/documentation', function () {
+    return view('documentation');
+})->name('documentation');
+
 // Redirect dashboard based on user role
 Route::get('/dashboard', function () {
     if (auth()->user()->isAdmin()) {
@@ -71,6 +99,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     // Weekly overview and daily sub-lists
     Route::get('/weekly-overview', [TaskListController::class, 'weeklyOverview'])->name('weekly-overview');
     Route::post('/lists/{list}/create-daily-sublists', [TaskListController::class, 'createDailySubLists'])->name('lists.create-daily-sublists');
+    Route::post('/lists/{list}/create-day-list', [TaskListController::class, 'createDayList'])->name('lists.create-day-list');
 });
 
 // Employee Routes

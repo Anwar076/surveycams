@@ -2,10 +2,10 @@
 
 @section('content')
     <!-- Clean Header Section -->
-    <div class="bg-white border-b border-gray-200 p-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+    <div class="bg-white border-b border-gray-200 p-6 lg:p-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div class="mb-4 lg:mb-0">
+                <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
                 <p class="text-gray-600">Comprehensive overview of your task management system</p>
             </div>
             <div class="hidden lg:block">
@@ -19,12 +19,12 @@
     </div>
 
     <!-- Main Content -->
-    <div class="p-8">
+    <div class="p-4 lg:p-8">
 
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
             <!-- Total Employees Card -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 lg:p-6 hover:shadow-xl transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,7 +45,7 @@
             </div>
 
             <!-- Active Lists Card -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 lg:p-6 hover:shadow-xl transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@
             </div>
 
             <!-- Pending Review Card -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 lg:p-6 hover:shadow-xl transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,7 +87,7 @@
             </div>
 
             <!-- Completed Today Card -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 lg:p-6 hover:shadow-xl transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,10 +109,10 @@
         </div>
 
         <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             <!-- Recent Activity Feed -->
             <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div class="p-6 border-b border-gray-200">
+                <div class="p-4 lg:p-6 border-b border-gray-200">
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-xl font-bold text-gray-900">Recent Activity</h3>
@@ -125,10 +125,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="p-6">
+                <div class="p-4 lg:p-6">
                     <div class="space-y-4">
                         @forelse($recentSubmissions as $submission)
-                            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                            <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                 <div class="relative">
                                     <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
                                         <span class="text-white font-bold text-lg">{{ substr($submission->user->name, 0, 1) }}</span>
@@ -147,7 +147,7 @@
                                         <span>{{ $submission->created_at->diffForHumans() }}</span>
                                     </p>
                                 </div>
-                                <div class="flex items-center space-x-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border
                                         @if($submission->status === 'completed') bg-amber-100 text-amber-800 border-amber-200
                                         @elseif($submission->status === 'reviewed') bg-green-100 text-green-800 border-green-200
@@ -179,7 +179,7 @@
 
             <!-- Quick Actions Panel -->
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div class="p-6 border-b border-gray-200">
+                <div class="p-4 lg:p-6 border-b border-gray-200">
                     <div class="flex items-center space-x-3">
                         <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,7 +192,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="p-6">
+                <div class="p-4 lg:p-6">
                     <div class="space-y-4">
                         <a href="{{ route('admin.lists.create') }}" class="block p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors border border-blue-200">
                             <div class="flex items-center space-x-3">
@@ -241,8 +241,8 @@
         </div>
 
         <!-- Team Performance Section -->
-        <div class="mt-8 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
+        <div class="mt-6 lg:mt-8 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="p-4 lg:p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-xl font-bold text-gray-900">Team Performance</h3>
@@ -255,10 +255,10 @@
                     </div>
                 </div>
             </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="p-4 lg:p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                     @forelse($employeeStats as $employee)
-                        <div class="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-colors">
+                        <div class="bg-gray-50 rounded-xl p-4 lg:p-6 hover:bg-gray-100 transition-colors">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="relative">
                                     <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">

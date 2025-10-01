@@ -94,10 +94,17 @@
             <!-- Search Bar -->
             <div class="mt-8 max-w-2xl mx-auto fade-up" style="animation-delay:0.6s;">
                 <div class="relative">
-                    <input type="text" placeholder="Search for help articles..." class="w-full px-6 py-4 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    <input type="text" id="helpSearch" placeholder="Search for help articles..." class="w-full px-6 py-4 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
+                </div>
+                <!-- Search Results -->
+                <div id="searchResults" class="mt-4 bg-white rounded-lg shadow-lg border hidden max-h-96 overflow-y-auto">
+                    <div class="p-4">
+                        <div class="text-sm text-gray-500 mb-2">Search results:</div>
+                        <div id="searchResultsList"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -357,5 +364,112 @@
             </div>
         </div>
     </footer>
+
+    <!-- Search Functionality -->
+    <script>
+        // Help articles data
+        const helpArticles = [
+            {
+                title: "How do I create my first task?",
+                content: "Click the 'New Task' button in your dashboard, fill in the task details, set a due date and priority, then click 'Create Task'.",
+                category: "Getting Started"
+            },
+            {
+                title: "How can I invite team members?",
+                content: "Go to Settings > Team Management, click 'Invite Members', enter their email addresses, and choose their role (Admin or Employee).",
+                category: "Team Management"
+            },
+            {
+                title: "Can I change my subscription plan?",
+                content: "Yes! You can upgrade or downgrade your plan at any time from your account settings. Changes take effect immediately.",
+                category: "Billing"
+            },
+            {
+                title: "How do I export my data?",
+                content: "Go to Settings > Data & Privacy, then click 'Export Data'. You'll receive an email with a download link for your data.",
+                category: "Data Management"
+            },
+            {
+                title: "Is there a mobile app?",
+                content: "Yes! TaskCheck has mobile apps for iOS and Android. Download them from the App Store or Google Play Store.",
+                category: "Mobile"
+            },
+            {
+                title: "How do I set up notifications?",
+                content: "Go to Settings > Notifications to customize your notification preferences for email, push, and in-app notifications.",
+                category: "Settings"
+            },
+            {
+                title: "Managing Tasks",
+                content: "Create, organize, and track tasks with our intuitive task management system. Use filters, labels, and due dates to stay organized.",
+                category: "Tasks"
+            },
+            {
+                title: "Team Collaboration",
+                content: "Work together with your team using comments, file sharing, and real-time updates. Assign tasks and track progress collaboratively.",
+                category: "Collaboration"
+            },
+            {
+                title: "API Integration",
+                content: "Integrate TaskCheck with your applications using our REST API. Access tasks, users, and teams programmatically.",
+                category: "API"
+            },
+            {
+                title: "Security Best Practices",
+                content: "Learn about our security features including two-factor authentication, data encryption, and access controls.",
+                category: "Security"
+            }
+        ];
+
+        // Search functionality
+        const searchInput = document.getElementById('helpSearch');
+        const searchResults = document.getElementById('searchResults');
+        const searchResultsList = document.getElementById('searchResultsList');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            
+            if (query.length < 2) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+
+            const results = helpArticles.filter(article => 
+                article.title.toLowerCase().includes(query) || 
+                article.content.toLowerCase().includes(query) ||
+                article.category.toLowerCase().includes(query)
+            );
+
+            if (results.length === 0) {
+                searchResultsList.innerHTML = '<div class="text-gray-500 text-sm">No results found</div>';
+            } else {
+                searchResultsList.innerHTML = results.map(article => `
+                    <div class="border-b border-gray-100 py-3 last:border-b-0">
+                        <div class="font-medium text-gray-900 mb-1">${article.title}</div>
+                        <div class="text-sm text-gray-600 mb-2">${article.content.substring(0, 100)}...</div>
+                        <div class="text-xs text-blue-600">${article.category}</div>
+                    </div>
+                `).join('');
+            }
+
+            searchResults.classList.remove('hidden');
+        });
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        // Live chat functionality
+        const liveChatBtn = document.querySelector('button:contains("Start Chat")');
+        if (liveChatBtn) {
+            liveChatBtn.addEventListener('click', function() {
+                // Simulate opening live chat
+                alert('Live chat would open here. This is a demo - in a real implementation, this would connect to a chat service like Intercom, Zendesk, or custom chat widget.');
+            });
+        }
+    </script>
 </body>
 </html>

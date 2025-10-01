@@ -142,22 +142,18 @@ class TaskListController extends Controller
 
         $list = TaskList::create($validated);
 
-        // Handle Weekly Schedule Structure
-        if ($request->has('enable_weekly_structure') && $request->get('enable_weekly_structure')) {
-            // Store the weekly structure in schedule_config
-            $list->update([
-                'schedule_config' => array_merge($list->schedule_config ?? [], [
-                    'weekly_structure' => [
-                        'enabled' => true,
-                        'selected_days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] // Default to all days
-                    ]
-                ])
-            ]);
-        }
-
-        // Legacy: Create daily sub-lists if requested (for backward compatibility)
-        if ($request->has('create_daily_sublists') && $list->isMainList()) {
-            $list->createDailySubLists();
+        // Handle automatic day-specific list creation based on schedule type
+        if ($validated['schedule_type'] === 'daily') {
+            // Create lists for all 7 days
+            $weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            foreach ($weekdays as $weekday) {
+                $this->createDaySpecificList($list, $weekday);
+            }
+        } elseif ($validated['schedule_type'] === 'weekly' && isset($validated['schedule_config']['weekdays'])) {
+            // Create lists only for selected days
+            foreach ($validated['schedule_config']['weekdays'] as $weekday) {
+                $this->createDaySpecificList($list, $weekday);
+            }
         }
 
         return redirect()->route('admin.lists.show', $list)
@@ -274,58 +270,13 @@ class TaskListController extends Controller
             }
         }
 
+        $oldScheduleType = $list->schedule_type;
+        $oldScheduleConfig = $list->schedule_config;
+        
         $list->update($validated);
 
-        // Handle Weekly Schedule Structure
-        if ($request->has('enable_weekly_structure') && $request->get('enable_weekly_structure')) {
-            $selectedDays = $request->get('selected_days', []);
-            $dayTasks = $request->get('day_tasks', []);
-            
-            // Store the weekly structure in schedule_config
-            $list->update([
-                'schedule_config' => array_merge($list->schedule_config ?? [], [
-                    'weekly_structure' => [
-                        'enabled' => true,
-                        'selected_days' => $selectedDays,
-                        'day_tasks' => $dayTasks
-                    ]
-                ])
-            ]);
-
-            // Remove existing tasks with weekday assignments
-            $list->tasks()->whereNotNull('weekday')->delete();
-
-            // Create tasks for each day
-            foreach ($selectedDays as $day) {
-                if (isset($dayTasks[$day])) {
-                    foreach ($dayTasks[$day] as $taskData) {
-                        $list->tasks()->create([
-                            'title' => $taskData['title'],
-                            'description' => $taskData['description'] ?? null,
-                            'order' => $taskData['order'],
-                            'is_required' => $taskData['is_required'] ?? false,
-                            'required_proof_type' => $taskData['required_proof_type'] ?? 'none',
-                            'instructions' => $taskData['instructions'] ?? null,
-                            'weekday' => $day,
-                            'created_by' => auth()->id(),
-                        ]);
-                    }
-                }
-            }
-        } else {
-            // Remove weekly structure if disabled
-            $scheduleConfig = $list->schedule_config ?? [];
-            unset($scheduleConfig['weekly_structure']);
-            $list->update(['schedule_config' => $scheduleConfig]);
-            
-            // Remove tasks with weekday assignments
-            $list->tasks()->whereNotNull('weekday')->delete();
-        }
-
-        // Legacy: Create daily sub-lists if requested and this is a main list
-        if ($request->has('create_daily_sublists') && $list->isMainList()) {
-            $list->createDailySubLists();
-        }
+        // Handle schedule type changes and day-specific list management
+        $this->handleScheduleTypeChanges($list, $oldScheduleType, $oldScheduleConfig, $validated);
 
         return redirect()->route('admin.lists.show', $list)
             ->with('success', 'Task list updated successfully.');
@@ -663,5 +614,102 @@ class TaskListController extends Controller
         $list->createDailySubLists();
 
         return back()->with('success', 'Daily sub-lists created successfully. You can now drag and drop tasks to specific days.');
+    }
+
+    /**
+     * Create a day-specific list for a parent list
+     */
+    public function createDaySpecificList(TaskList $parentList, string $weekday)
+    {
+        $dayNames = [
+            'monday' => 'Monday',
+            'tuesday' => 'Tuesday',
+            'wednesday' => 'Wednesday',
+            'thursday' => 'Thursday',
+            'friday' => 'Friday',
+            'saturday' => 'Saturday',
+            'sunday' => 'Sunday'
+        ];
+
+        $dayName = $dayNames[$weekday] ?? ucfirst($weekday);
+
+        // Check if day-specific list already exists
+        $existingList = $parentList->subLists()->where('weekday', $weekday)->first();
+        if ($existingList) {
+            return $existingList;
+        }
+
+        // Create the day-specific list
+        $dayList = TaskList::create([
+            'title' => $parentList->title . ' - ' . $dayName,
+            'description' => $parentList->description . ' (Scheduled for ' . $dayName . ')',
+            'parent_list_id' => $parentList->id,
+            'weekday' => $weekday,
+            'schedule_type' => 'once', // Day-specific lists are always one-time
+            'schedule_config' => null,
+            'priority' => $parentList->priority,
+            'category' => $parentList->category,
+            'requires_signature' => $parentList->requires_signature,
+            'is_template' => false,
+            'is_active' => $parentList->is_active,
+            'created_by' => $parentList->created_by,
+        ]);
+
+        return $dayList;
+    }
+
+    /**
+     * Handle schedule type changes and manage day-specific lists
+     */
+    private function handleScheduleTypeChanges(TaskList $list, string $oldScheduleType, ?array $oldScheduleConfig, array $newValidated)
+    {
+        $newScheduleType = $newValidated['schedule_type'];
+        $newScheduleConfig = $newValidated['schedule_config'] ?? null;
+
+        // If schedule type changed or schedule config changed
+        if ($oldScheduleType !== $newScheduleType || $oldScheduleConfig !== $newScheduleConfig) {
+            
+            // Remove existing day-specific lists if changing away from daily/weekly
+            if (($oldScheduleType === 'daily' || $oldScheduleType === 'weekly') && 
+                ($newScheduleType !== 'daily' && $newScheduleType !== 'weekly')) {
+                $list->subLists()->delete();
+            }
+            
+            // Handle new schedule type
+            if ($newScheduleType === 'daily') {
+                // Create lists for all 7 days
+                $weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                foreach ($weekdays as $weekday) {
+                    $this->createDaySpecificList($list, $weekday);
+                }
+            } elseif ($newScheduleType === 'weekly' && isset($newScheduleConfig['weekdays'])) {
+                // Create lists only for selected days
+                foreach ($newScheduleConfig['weekdays'] as $weekday) {
+                    $this->createDaySpecificList($list, $weekday);
+                }
+                
+                // Remove day-specific lists for unselected days
+                $list->subLists()->whereNotIn('weekday', $newScheduleConfig['weekdays'])->delete();
+            }
+        }
+    }
+
+    /**
+     * Create a day-specific list via AJAX
+     */
+    public function createDayList(Request $request, TaskList $list)
+    {
+        $validated = $request->validate([
+            'weekday' => 'required|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'day_name' => 'required|string|max:255'
+        ]);
+
+        $dayList = $this->createDaySpecificList($list, $validated['weekday']);
+
+        return response()->json([
+            'success' => true,
+            'message' => $validated['day_name'] . ' list created successfully.',
+            'day_list_id' => $dayList->id
+        ]);
     }
 }

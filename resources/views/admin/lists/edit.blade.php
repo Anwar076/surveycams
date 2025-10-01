@@ -111,9 +111,28 @@
                     <div id="schedule-config" class="border-b border-slate-200/50 pb-8" style="display: none;">
                         <h3 class="text-2xl font-bold text-slate-900 mb-6">Schedule Configuration</h3>
                 
+                        <!-- Daily Schedule -->
+                        <div id="daily-config" class="hidden">
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-blue-900">Daily Schedule</h4>
+                                        <p class="text-sm text-blue-700">This will automatically create separate lists for all 7 days of the week (Monday through Sunday).</p>
+                                        <p class="text-xs text-blue-600 mt-1">⚠️ Changing to daily will create new day-specific lists and may affect existing assignments.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Weekly Schedule -->
                         <div id="weekly-config" class="hidden">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Select Days of Week</label>
+                            <p class="text-sm text-gray-600 mb-4">Choose which days of the week this list should be active. Separate lists will be created for each selected day.</p>
                             <div class="grid grid-cols-7 gap-2">
                                 @php
                                     $weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -128,6 +147,7 @@
                                 </label>
                                 @endforeach
                             </div>
+                            <p class="text-xs text-orange-600 mt-2">⚠️ Changing selected days will create/remove day-specific lists and may affect existing assignments.</p>
                         </div>
 
                         <!-- Monthly Schedule -->
@@ -261,29 +281,6 @@
                         </div>
                     </div>
 
-                    <!-- Weekly Schedule Structure Option -->
-                    <div class="border-t border-slate-200/50 pt-8">
-                        <h3 class="text-2xl font-bold text-slate-900 mb-6">Weekly Schedule Structure</h3>
-                        <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-6">
-                            <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="text-lg font-bold text-slate-900 mb-2">Enable Weekly Day Structure</h4>
-                                    <p class="text-slate-600 mb-4">Create a structured weekly schedule with day-specific tasks. You can add tasks for each day after creating the list.</p>
-                                    <div class="flex items-center">
-                                        <input type="checkbox" name="enable_weekly_structure" id="enable_weekly_structure" value="1" {{ old('enable_weekly_structure', $list->hasWeeklyStructure()) ? 'checked' : '' }} class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded">
-                                        <label for="enable_weekly_structure" class="ml-2 block text-sm font-semibold text-slate-900">
-                                            Enable weekly day structure
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Submit Section -->
                     <div class="flex justify-end space-x-4 pt-8">
@@ -338,18 +335,23 @@
 function toggleScheduleConfig() {
     const scheduleType = document.getElementById('schedule_type').value;
     const configDiv = document.getElementById('schedule-config');
+    const dailyConfig = document.getElementById('daily-config');
     const weeklyConfig = document.getElementById('weekly-config');
     const monthlyConfig = document.getElementById('monthly-config');
     const customConfig = document.getElementById('custom-config');
 
     // Hide all configs first
     configDiv.style.display = 'none';
+    dailyConfig.classList.add('hidden');
     weeklyConfig.classList.add('hidden');
     monthlyConfig.classList.add('hidden');
     customConfig.classList.add('hidden');
 
     // Show relevant config based on schedule type
-    if (scheduleType === 'weekly') {
+    if (scheduleType === 'daily') {
+        configDiv.style.display = 'block';
+        dailyConfig.classList.remove('hidden');
+    } else if (scheduleType === 'weekly') {
         configDiv.style.display = 'block';
         weeklyConfig.classList.remove('hidden');
     } else if (scheduleType === 'monthly') {

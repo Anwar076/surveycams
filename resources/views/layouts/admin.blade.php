@@ -156,7 +156,7 @@
                 <div class="p-6">
                     <!-- Flash Messages -->
                     @if (session('success'))
-                        <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4">
+                        <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flash-message">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -167,7 +167,7 @@
                     @endif
 
                     @if (session('error'))
-                        <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                        <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flash-message">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -321,8 +321,8 @@
                 });
             }
 
-            // Auto-hide flash messages
-            const flashMessages = document.querySelectorAll('.bg-green-50, .bg-red-50');
+            // Auto-hide flash messages (only those with the flash-message class)
+            const flashMessages = document.querySelectorAll('.flash-message');
             flashMessages.forEach(function(message) {
                 setTimeout(function() {
                     message.style.transition = 'opacity 0.5s ease-out';
