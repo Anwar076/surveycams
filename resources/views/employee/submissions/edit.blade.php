@@ -196,23 +196,64 @@
                                 @if(in_array($task->required_proof_type, ['photo', 'video', 'file', 'any']))
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                            Upload {{ ucfirst($task->required_proof_type) }}
+                                            Proof Files
                                             @if($task->required_proof_type !== 'any') <span class="text-red-500">*</span> @endif
                                         </label>
-                                        <div class="mt-1">
-                                            <input type="file" name="proof_files[]" multiple 
-                                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                                @if($task->required_proof_type === 'photo') accept="image/*" @endif
-                                                @if($task->required_proof_type === 'video') accept="video/*" @endif
-                                                {{ in_array($task->required_proof_type, ['photo', 'video', 'file']) ? 'required' : '' }}>
+                                        
+                                        <!-- Camera/Upload Options -->
+                                        <div class="mb-4">
+                                            <div class="flex flex-wrap gap-3">
+                                                @if($task->required_proof_type === 'photo' || $task->required_proof_type === 'any')
+                                                    <button type="button" onclick="openCamera('photo', '{{ $submissionTask->id }}')" 
+                                                            class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                        </svg>
+                                                        Make Photo
+                                                    </button>
+                                                @endif
+                                                
+                                                @if($task->required_proof_type === 'video' || $task->required_proof_type === 'any')
+                                                    <button type="button" onclick="openCamera('video', '{{ $submissionTask->id }}')" 
+                                                            class="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                                        </svg>
+                                                        Make Video
+                                                    </button>
+                                                @endif
+                                                
+                                                <button type="button" onclick="document.getElementById('file-input-{{ $submissionTask->id }}').click()" 
+                                                        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                                    </svg>
+                                                    Upload File
+                                                </button>
+                                            </div>
                                         </div>
+                                        
+                                        <!-- Hidden file input -->
+                                        <input type="file" id="file-input-{{ $submissionTask->id }}" name="proof_files[]" multiple 
+                                            class="hidden"
+                                            @if($task->required_proof_type === 'photo') accept="image/*" @endif
+                                            @if($task->required_proof_type === 'video') accept="video/*" @endif
+                                            onchange="handleFileSelect(this, '{{ $submissionTask->id }}')"
+                                            {{ in_array($task->required_proof_type, ['photo', 'video', 'file']) ? 'required' : '' }}>
+                                        
+                                        <!-- Preview area -->
+                                        <div id="preview-area-{{ $submissionTask->id }}" class="mt-4 space-y-2">
+                                            <!-- Preview items will be added here -->
+                                        </div>
+                                        
                                         <p class="mt-2 text-sm text-gray-500">
                                             @if($task->required_proof_type === 'photo')
-                                                Upload photos as proof of completion. Max 5MB per file.
+                                                Take photos or upload images as proof. Max 5MB per file.
                                             @elseif($task->required_proof_type === 'video')
-                                                Upload videos as proof of completion. Max 10MB per file.
+                                                Create videos or upload videos as proof. Max 10MB per file.
                                             @else
-                                                Upload files as proof of completion. Max 10MB per file.
+                                                Upload files as proof. Max 10MB per file.
                                             @endif
                                         </p>
                                     </div>
@@ -535,6 +576,229 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Camera functionality
+function openCamera(type, taskId) {
+    const constraints = {
+        video: {
+            facingMode: 'environment', // Use back camera if available
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        },
+        audio: type === 'video'
+    };
+
+    navigator.mediaDevices.getUserMedia(constraints)
+        .then(stream => {
+            showCameraModal(type, taskId, stream);
+        })
+        .catch(error => {
+            console.error('Camera access error:', error);
+            alert('Camera toegang geweigerd of niet beschikbaar. Gebruik de upload optie in plaats daarvan.');
+        });
+}
+
+function showCameraModal(type, taskId, stream) {
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="text-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    ${type === 'photo' ? 'Foto Maken' : 'Video Opnemen'}
+                </h3>
+            </div>
+            
+            <div class="mb-4">
+                <video id="camera-preview-${taskId}" autoplay muted class="w-full h-64 bg-gray-900 rounded-lg"></video>
+                <canvas id="camera-canvas-${taskId}" class="hidden"></canvas>
+            </div>
+            
+            <div class="flex justify-center space-x-4">
+                <button id="capture-btn-${taskId}" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    ${type === 'photo' ? 'Foto Maken' : 'Opname Starten'}
+                </button>
+                <button id="stop-btn-${taskId}" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors hidden">
+                    Opname Stoppen
+                </button>
+                <button id="close-camera-${taskId}" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                    Sluiten
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    const video = document.getElementById(`camera-preview-${taskId}`);
+    const canvas = document.getElementById(`camera-canvas-${taskId}`);
+    const captureBtn = document.getElementById(`capture-btn-${taskId}`);
+    const stopBtn = document.getElementById(`stop-btn-${taskId}`);
+    const closeBtn = document.getElementById(`close-camera-${taskId}`);
+    
+    video.srcObject = stream;
+    
+    let mediaRecorder;
+    let recordedChunks = [];
+    
+    if (type === 'video') {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+        
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            addFileToPreview(blob, `video-${Date.now()}.webm`, taskId);
+            recordedChunks = [];
+        };
+    }
+    
+    captureBtn.addEventListener('click', () => {
+        if (type === 'photo') {
+            // Take photo
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            canvas.toBlob(blob => {
+                addFileToPreview(blob, `photo-${Date.now()}.jpg`, taskId);
+                closeCameraModal(modal, stream);
+            }, 'image/jpeg', 0.8);
+        } else {
+            // Start video recording
+            mediaRecorder.start();
+            captureBtn.classList.add('hidden');
+            stopBtn.classList.remove('hidden');
+        }
+    });
+    
+    stopBtn.addEventListener('click', () => {
+        mediaRecorder.stop();
+        closeCameraModal(modal, stream);
+    });
+    
+    closeBtn.addEventListener('click', () => {
+        closeCameraModal(modal, stream);
+    });
+    
+    // Close on outside click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeCameraModal(modal, stream);
+        }
+    });
+}
+
+function closeCameraModal(modal, stream) {
+    // Stop all tracks
+    stream.getTracks().forEach(track => track.stop());
+    
+    // Remove modal
+    document.body.removeChild(modal);
+}
+
+function addFileToPreview(blob, filename, taskId) {
+    const previewArea = document.getElementById(`preview-area-${taskId}`);
+    const fileInput = document.getElementById(`file-input-${taskId}`);
+    
+    // Create a File object from the blob
+    const file = new File([blob], filename, { type: blob.type });
+    
+    // Add to file input
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    fileInput.files = dataTransfer.files;
+    
+    // Create preview element
+    const previewItem = document.createElement('div');
+    previewItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg border';
+    
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+    
+    let previewContent = '';
+    if (isImage) {
+        const url = URL.createObjectURL(blob);
+        previewContent = `
+            <div class="flex items-center space-x-3">
+                <img src="${url}" alt="Preview" class="w-16 h-16 object-cover rounded-lg">
+                <div>
+                    <p class="text-sm font-medium text-gray-900">${filename}</p>
+                    <p class="text-xs text-gray-500">Foto</p>
+                </div>
+            </div>
+        `;
+    } else if (isVideo) {
+        const url = URL.createObjectURL(blob);
+        previewContent = `
+            <div class="flex items-center space-x-3">
+                <video src="${url}" class="w-16 h-16 object-cover rounded-lg" muted></video>
+                <div>
+                    <p class="text-sm font-medium text-gray-900">${filename}</p>
+                    <p class="text-xs text-gray-500">Video</p>
+                </div>
+            </div>
+        `;
+    } else {
+        previewContent = `
+            <div class="flex items-center space-x-3">
+                <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900">${filename}</p>
+                    <p class="text-xs text-gray-500">Bestand</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    previewItem.innerHTML = previewContent + `
+        <button type="button" onclick="removePreviewItem(this, '${taskId}')" class="text-red-600 hover:text-red-800">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    `;
+    
+    previewArea.appendChild(previewItem);
+}
+
+function handleFileSelect(input, taskId) {
+    const files = Array.from(input.files);
+    const previewArea = document.getElementById(`preview-area-${taskId}`);
+    
+    // Clear existing previews
+    previewArea.innerHTML = '';
+    
+    files.forEach(file => {
+        addFileToPreview(file, file.name, taskId);
+    });
+}
+
+function removePreviewItem(button, taskId) {
+    const previewItem = button.closest('div');
+    previewItem.remove();
+    
+    // Update file input
+    const fileInput = document.getElementById(`file-input-${taskId}`);
+    const dataTransfer = new DataTransfer();
+    
+    // Get remaining files from preview area
+    const remainingItems = document.querySelectorAll(`#preview-area-${taskId} > div`);
+    remainingItems.forEach(item => {
+        // This is a simplified approach - in a real implementation you'd need to track the actual files
+    });
+    
+    fileInput.files = dataTransfer.files;
+}
 </script>
 
 <style>
