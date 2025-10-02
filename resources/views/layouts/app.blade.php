@@ -37,20 +37,89 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        <!-- PWA Service Worker Registration -->
-        <script>
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js')
-                        .then((registration) => {
-                            console.log('SW registered: ', registration);
-                        })
-                        .catch((registrationError) => {
-                            console.log('SW registration failed: ', registrationError);
-                        });
-                });
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        const installButton = document.getElementById('install-button');
+        const installButtonMobile = document.getElementById('install-button-mobile');
+
+        // Function to show install instructions
+        function showInstallInstructions() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+
+            let instructions = '';
+            
+            if (isIOS) {
+                instructions = 'To install: Tap the Share button (📤) in Safari, then tap "Add to Home Screen"';
+            } else if (isAndroid) {
+                instructions = 'To install: Tap the menu (⋮) in Chrome, then tap "Add to Home Screen" or "Install App"';
+            } else {
+                instructions = 'To install: Click the install button in your browser\'s address bar, or use the browser menu';
             }
-        </script>
+
+            alert(`📱 Install TaskCheck App\n\n${instructions}\n\nOr look for the install option in your browser menu.`);
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installButton) {
+                installButton.style.display = 'block';
+            }
+            if (installButtonMobile) {
+                installButtonMobile.style.display = 'block';
+            }
+        });
+
+        function handleInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    console.log(`User response to the install prompt: ${choiceResult.outcome}`);
+                    deferredPrompt = null;
+                    if (installButton) {
+                        installButton.style.display = 'none';
+                    }
+                    if (installButtonMobile) {
+                        installButtonMobile.style.display = 'none';
+                    }
+                });
+            } else {
+                showInstallInstructions();
+            }
+        }
+
+        if (installButton) {
+            installButton.addEventListener('click', handleInstall);
+        }
+        if (installButtonMobile) {
+            installButtonMobile.addEventListener('click', handleInstall);
+        }
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            if (installButton) {
+                installButton.style.display = 'none';
+            }
+            if (installButtonMobile) {
+                installButtonMobile.style.display = 'none';
+            }
+        });
+    </script>
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">

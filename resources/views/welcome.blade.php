@@ -115,6 +115,12 @@
                     </svg>
                     Install App
                 </button>
+                <button id="install-button-always" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Add to Home Screen
+                </button>
             </div>
 
             <!-- Mobile Menu Button -->
@@ -140,6 +146,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     Install App
+                </button>
+                <button id="install-button-mobile-always" class="w-full text-left bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Add to Home Screen
                 </button>
                 @if (Route::has('login'))
                     @auth
@@ -183,6 +195,28 @@
                 <div class="bg-white/70 backdrop-blur-md rounded-xl p-4 shadow-lg">
                     <div class="text-2xl font-bold text-orange-600" id="live-hours">2,847</div>
                     <div class="text-sm text-gray-600">Hours Saved</div>
+                </div>
+            </div>
+            
+            <!-- PWA Install Section -->
+            <div class="mt-12 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 fade-up" style="animation-delay:0.9s;">
+                <div class="text-center">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">📱 Install TaskCheck App</h3>
+                    <p class="text-gray-600 mb-4">Get quick access with our mobile app. Works on all devices!</p>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button id="install-hero-button" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105">
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Install App
+                        </button>
+                        <div class="text-sm text-gray-500 flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Works on iPhone, Android, Desktop & iPad
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -643,6 +677,28 @@
         let deferredPrompt;
         const installButton = document.getElementById('install-button');
         const installButtonMobile = document.getElementById('install-button-mobile');
+        const installButtonAlways = document.getElementById('install-button-always');
+        const installButtonMobileAlways = document.getElementById('install-button-mobile-always');
+        const installHeroButton = document.getElementById('install-hero-button');
+
+        // Function to show install instructions
+        function showInstallInstructions() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const isDesktop = !isIOS && !isAndroid;
+
+            let instructions = '';
+            
+            if (isIOS) {
+                instructions = 'To install: Tap the Share button (📤) in Safari, then tap "Add to Home Screen"';
+            } else if (isAndroid) {
+                instructions = 'To install: Tap the menu (⋮) in Chrome, then tap "Add to Home Screen" or "Install App"';
+            } else {
+                instructions = 'To install: Click the install button in your browser\'s address bar, or use the browser menu';
+            }
+
+            alert(`📱 Install TaskCheck App\n\n${instructions}\n\nOr look for the install option in your browser menu.`);
+        }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             // Prevent the mini-infobar from appearing on mobile
@@ -655,6 +711,9 @@
             }
             if (installButtonMobile) {
                 installButtonMobile.style.display = 'block';
+            }
+            if (installHeroButton) {
+                installHeroButton.textContent = 'Install App';
             }
         });
 
@@ -675,15 +734,27 @@
                         installButtonMobile.style.display = 'none';
                     }
                 });
+            } else {
+                // Show instructions if no prompt available
+                showInstallInstructions();
             }
         }
 
+        // Add event listeners
         if (installButton) {
             installButton.addEventListener('click', handleInstall);
         }
-
         if (installButtonMobile) {
             installButtonMobile.addEventListener('click', handleInstall);
+        }
+        if (installButtonAlways) {
+            installButtonAlways.addEventListener('click', showInstallInstructions);
+        }
+        if (installButtonMobileAlways) {
+            installButtonMobileAlways.addEventListener('click', showInstallInstructions);
+        }
+        if (installHeroButton) {
+            installHeroButton.addEventListener('click', handleInstall);
         }
 
         // Track successful installation
@@ -694,6 +765,11 @@
             }
             if (installButtonMobile) {
                 installButtonMobile.style.display = 'none';
+            }
+            if (installHeroButton) {
+                installHeroButton.textContent = 'App Installed!';
+                installHeroButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                installHeroButton.classList.add('bg-green-600');
             }
         });
     </script>
