@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'TaskCheck') }}</title>
 
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Professional task management and team collaboration platform">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="TaskCheck">
+    <meta name="msapplication-TileColor" content="#2563eb">
+    <meta name="msapplication-tap-highlight" content="no">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ asset('icons/icon-32x32.png') }}">
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -86,6 +109,12 @@
                         <a href="{{ route('login') }}" class="btn-gradient text-white px-5 py-2 rounded-lg font-medium">Login</a>
                     @endauth
                 @endif
+                <button id="install-button" class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Install App
+                </button>
             </div>
 
             <!-- Mobile Menu Button -->
@@ -106,6 +135,12 @@
                 <a href="{{ route('careers') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Careers</a>
                 <a href="{{ route('help') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Help</a>
                 <a href="{{ route('contact') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Contact</a>
+                <button id="install-button-mobile" class="hidden w-full text-left bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Install App
+                </button>
                 @if (Route::has('login'))
                     @auth
                         <a href="{{ url('/dashboard') }}" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Dashboard</a>
@@ -589,6 +624,77 @@
                     mobileMenu.classList.add('hidden');
                 }
             });
+        });
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        const installButton = document.getElementById('install-button');
+        const installButtonMobile = document.getElementById('install-button-mobile');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Show the install buttons
+            if (installButton) {
+                installButton.style.display = 'block';
+            }
+            if (installButtonMobile) {
+                installButtonMobile.style.display = 'block';
+            }
+        });
+
+        function handleInstall() {
+            if (deferredPrompt) {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    console.log(`User response to the install prompt: ${choiceResult.outcome}`);
+                    // Clear the deferredPrompt variable
+                    deferredPrompt = null;
+                    // Hide the install buttons
+                    if (installButton) {
+                        installButton.style.display = 'none';
+                    }
+                    if (installButtonMobile) {
+                        installButtonMobile.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        if (installButton) {
+            installButton.addEventListener('click', handleInstall);
+        }
+
+        if (installButtonMobile) {
+            installButtonMobile.addEventListener('click', handleInstall);
+        }
+
+        // Track successful installation
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            if (installButton) {
+                installButton.style.display = 'none';
+            }
+            if (installButtonMobile) {
+                installButtonMobile.style.display = 'none';
+            }
         });
     </script>
 </body>
