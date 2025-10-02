@@ -64,9 +64,9 @@
             let instructions = '';
             
             if (isIOS) {
-                instructions = 'To install: Tap the Share button (📤) in Safari, then tap "Add to Home Screen"';
+                instructions = 'To install as a real app:\n1. Tap the Share button (📤) in Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm\n\nThis will create a real app without the address bar!';
             } else if (isAndroid) {
-                instructions = 'To install: Tap the menu (⋮) in Chrome, then tap "Add to Home Screen" or "Install App"';
+                instructions = 'To install as a real app:\n1. Tap the menu (⋮) in Chrome\n2. Tap "Add to Home Screen" or "Install App"\n3. Tap "Install" to confirm\n\nThis will create a real app without the address bar!';
             } else {
                 instructions = 'To install: Click the install button in your browser\'s address bar, or use the browser menu';
             }

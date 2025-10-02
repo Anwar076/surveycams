@@ -1,4 +1,4 @@
-const CACHE_NAME = 'taskcheck-v1.0.0';
+const CACHE_NAME = 'taskcheck-v2.0.0';
 const urlsToCache = [
   '/',
   '/login',
@@ -8,7 +8,9 @@ const urlsToCache = [
   '/css/app.css',
   '/js/app.js',
   '/manifest.json',
-  // Add more static assets as needed
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/favicon.svg'
 ];
 
 // Install event - cache resources

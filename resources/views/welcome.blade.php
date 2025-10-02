@@ -217,6 +217,13 @@
                             Works on iPhone, Android, Desktop & iPad
                         </div>
                     </div>
+                    
+                    <!-- Mobile-specific instructions -->
+                    <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="text-sm text-yellow-800">
+                            <strong>📱 On Mobile:</strong> This creates a <strong>real app</strong> without the browser address bar - just like a native app!
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -690,9 +697,9 @@
             let instructions = '';
             
             if (isIOS) {
-                instructions = 'To install: Tap the Share button (📤) in Safari, then tap "Add to Home Screen"';
+                instructions = 'To install as a real app:\n1. Tap the Share button (📤) in Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm\n\nThis will create a real app without the address bar!';
             } else if (isAndroid) {
-                instructions = 'To install: Tap the menu (⋮) in Chrome, then tap "Add to Home Screen" or "Install App"';
+                instructions = 'To install as a real app:\n1. Tap the menu (⋮) in Chrome\n2. Tap "Add to Home Screen" or "Install App"\n3. Tap "Install" to confirm\n\nThis will create a real app without the address bar!';
             } else {
                 instructions = 'To install: Click the install button in your browser\'s address bar, or use the browser menu';
             }

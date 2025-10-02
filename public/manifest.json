@@ -4,6 +4,7 @@
   "description": "Professional task management and team collaboration platform",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
   "orientation": "portrait-primary",
@@ -64,58 +65,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop-screenshot.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshots/mobile-screenshot.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "View your dashboard",
-      "url": "/admin/dashboard",
-      "icons": [
-        {
-          "src": "/icons/shortcut-dashboard.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Task Lists",
-      "short_name": "Lists",
-      "description": "Manage task lists",
-      "url": "/admin/lists",
-      "icons": [
-        {
-          "src": "/icons/shortcut-lists.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Submissions",
-      "short_name": "Tasks",
-      "description": "View submissions",
-      "url": "/employee/submissions",
-      "icons": [
-        {
-          "src": "/icons/shortcut-submissions.png",
-          "sizes": "96x96"
-        }
-      ]
     }
   ],
   "related_applications": [],
