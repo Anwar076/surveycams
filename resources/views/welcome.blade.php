@@ -223,6 +223,9 @@
                         <div class="text-sm text-yellow-800">
                             <strong>📱 On Mobile:</strong> This creates a <strong>real app</strong> without the browser address bar - just like a native app!
                         </div>
+                        <div class="mt-2 text-xs text-yellow-700">
+                            <strong>⚠️ Important:</strong> Use Safari on iPhone or Chrome on Android. If you see "Make a fast link", you're in the wrong browser!
+                        </div>
                     </div>
                 </div>
             </div>
@@ -673,6 +676,18 @@
                 navigator.serviceWorker.register('/sw.js')
                     .then((registration) => {
                         console.log('SW registered: ', registration);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New content is available, force update
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    window.location.reload();
+                                }
+                            });
+                        });
                     })
                     .catch((registrationError) => {
                         console.log('SW registration failed: ', registrationError);
@@ -688,6 +703,23 @@
         const installButtonMobileAlways = document.getElementById('install-button-mobile-always');
         const installHeroButton = document.getElementById('install-hero-button');
 
+        // Check if app is already installed
+        function isAppInstalled() {
+            return window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone === true;
+        }
+
+        // Show install prompt if not installed
+        if (!isAppInstalled()) {
+            console.log('App not installed, showing install options');
+        } else {
+            console.log('App is already installed');
+            // Hide install buttons if already installed
+            [installButton, installButtonMobile, installButtonAlways, installButtonMobileAlways, installHeroButton].forEach(btn => {
+                if (btn) btn.style.display = 'none';
+            });
+        }
+
         // Function to show install instructions
         function showInstallInstructions() {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -697,9 +729,9 @@
             let instructions = '';
             
             if (isIOS) {
-                instructions = 'To install as a real app:\n1. Tap the Share button (📤) in Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm\n\nThis will create a real app without the address bar!';
+                instructions = 'To install as a REAL APP (not just a link):\n\n1. Make sure you\'re in Safari browser\n2. Tap the Share button (📤) at the bottom\n3. Scroll down and tap "Add to Home Screen"\n4. Tap "Add" to confirm\n\n✅ This creates a real app without browser bars!\n❌ If you see "Make a fast link" - you\'re not in Safari!';
             } else if (isAndroid) {
-                instructions = 'To install as a real app:\n1. Tap the menu (⋮) in Chrome\n2. Tap "Add to Home Screen" or "Install App"\n3. Tap "Install" to confirm\n\nThis will create a real app without the address bar!';
+                instructions = 'To install as a REAL APP (not just a link):\n\n1. Make sure you\'re in Chrome browser\n2. Tap the menu (⋮) in the top right\n3. Look for "Install App" or "Add to Home Screen"\n4. Tap "Install" to confirm\n\n✅ This creates a real app without browser bars!\n❌ If you see "Make a fast link" - try Chrome browser!';
             } else {
                 instructions = 'To install: Click the install button in your browser\'s address bar, or use the browser menu';
             }

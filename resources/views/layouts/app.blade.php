@@ -44,6 +44,18 @@
                 navigator.serviceWorker.register('/sw.js')
                     .then((registration) => {
                         console.log('SW registered: ', registration);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New content is available, force update
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    window.location.reload();
+                                }
+                            });
+                        });
                     })
                     .catch((registrationError) => {
                         console.log('SW registration failed: ', registrationError);
@@ -64,9 +76,9 @@
             let instructions = '';
             
             if (isIOS) {
-                instructions = 'To install as a real app:\n1. Tap the Share button (📤) in Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm\n\nThis will create a real app without the address bar!';
+                instructions = 'To install as a REAL APP (not just a link):\n\n1. Make sure you\'re in Safari browser\n2. Tap the Share button (📤) at the bottom\n3. Scroll down and tap "Add to Home Screen"\n4. Tap "Add" to confirm\n\n✅ This creates a real app without browser bars!\n❌ If you see "Make a fast link" - you\'re not in Safari!';
             } else if (isAndroid) {
-                instructions = 'To install as a real app:\n1. Tap the menu (⋮) in Chrome\n2. Tap "Add to Home Screen" or "Install App"\n3. Tap "Install" to confirm\n\nThis will create a real app without the address bar!';
+                instructions = 'To install as a REAL APP (not just a link):\n\n1. Make sure you\'re in Chrome browser\n2. Tap the menu (⋮) in the top right\n3. Look for "Install App" or "Add to Home Screen"\n4. Tap "Install" to confirm\n\n✅ This creates a real app without browser bars!\n❌ If you see "Make a fast link" - try Chrome browser!';
             } else {
                 instructions = 'To install: Click the install button in your browser\'s address bar, or use the browser menu';
             }

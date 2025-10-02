@@ -1,4 +1,4 @@
-const CACHE_NAME = 'taskcheck-v2.0.0';
+const CACHE_NAME = 'taskcheck-v3.0.0';
 const urlsToCache = [
   '/',
   '/login',
@@ -30,6 +30,13 @@ self.addEventListener('install', (event) => {
         console.error('Service Worker: Installation failed', error);
       })
   );
+});
+
+// Force update service worker
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Activate event - clean up old caches
