@@ -10,77 +10,66 @@ use App\Http\Controllers\Employee\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (Illuminate\Http\Request $request) {
-    // Check if request is from PWA
-    $isPwa = $request->query('source') === 'pwa' || 
-             $request->header('User-Agent') && str_contains($request->header('User-Agent'), 'wv') ||
-             $request->header('X-PWABuilder-Rewrite') ||
-             request()->headers->get('sec-fetch-dest') === 'empty';
-    
-    // If coming from PWA, redirect to login
-    if ($isPwa) {
-        return redirect()->route('login');
-    }
-    
-    // Otherwise show welcome page for web browsers
+    // Always show welcome page for web browsers
     return view('welcome');
-})->name('welcome');
+})->name('welcome')->middleware('pwa');
 
 // Public pages (only for web browsers)
 Route::get('/features', function () {
     return view('features');
-})->name('features');
+})->name('features')->middleware('pwa');
 
 Route::get('/pricing', function () {
     return view('pricing');
-})->name('pricing');
+})->name('pricing')->middleware('pwa');
 
 Route::get('/about', function () {
     return view('about');
-})->name('about');
+})->name('about')->middleware('pwa');
 
 Route::get('/contact', function () {
     return view('contact');
-})->name('contact');
+})->name('contact')->middleware('pwa');
 
 Route::get('/help', function () {
     return view('help');
-})->name('help');
+})->name('help')->middleware('pwa');
 
 Route::get('/privacy', function () {
     return view('privacy');
-})->name('privacy');
+})->name('privacy')->middleware('pwa');
 
 Route::get('/terms', function () {
     return view('terms');
-})->name('terms');
+})->name('terms')->middleware('pwa');
 
 Route::get('/status', function () {
     return view('status');
-})->name('status');
+})->name('status')->middleware('pwa');
 
 Route::get('/security', function () {
     return view('security');
-})->name('security');
+})->name('security')->middleware('pwa');
 
 Route::get('/api', function () {
     return view('api');
-})->name('api');
+})->name('api')->middleware('pwa');
 
 Route::get('/integrations', function () {
     return view('integrations');
-})->name('integrations');
+})->name('integrations')->middleware('pwa');
 
 Route::get('/blog', function () {
     return view('blog');
-})->name('blog');
+})->name('blog')->middleware('pwa');
 
 Route::get('/careers', function () {
     return view('careers');
-})->name('careers');
+})->name('careers')->middleware('pwa');
 
 Route::get('/documentation', function () {
     return view('documentation');
-})->name('documentation');
+})->name('documentation')->middleware('pwa');
 
 // Redirect dashboard based on user role
 Route::get('/dashboard', function () {

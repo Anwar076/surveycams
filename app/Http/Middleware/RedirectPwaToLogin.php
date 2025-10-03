@@ -18,29 +18,27 @@ class RedirectPwaToLogin
         $isPwa = $this->isPwaRequest($request);
         $routeName = $request->route() ? $request->route()->getName() : null;
 
-        // Allowed routes for PWA users
-        $allowedPwaRoutes = [
-            'login',
-            'register', 
-            'password.request',
-            'password.reset',
-            'password.email',
-            'dashboard',
-            'admin.dashboard',
-            'employee.dashboard',
-            'admin.lists.index',
-            'admin.lists.show',
-            'admin.lists.create',
-            'admin.lists.edit',
-            'admin.submissions.index',
-            'admin.submissions.show',
-            'employee.submissions.index',
-            'employee.submissions.edit',
-            'employee.submissions.show',
+        // Marketing/public pages that should be hidden in PWA
+        $hiddenInPwa = [
+            'welcome',
+            'features',
+            'pricing',
+            'about',
+            'blog',
+            'careers',
+            'contact',
+            'help',
+            'documentation',
+            'status',
+            'security',
+            'api',
+            'integrations',
+            'privacy',
+            'terms',
         ];
 
-        // If PWA user tries to access non-allowed routes, redirect to login
-        if ($isPwa && !in_array($routeName, $allowedPwaRoutes) && !auth()->check()) {
+        // If PWA user tries to access marketing pages, redirect to login
+        if ($isPwa && in_array($routeName, $hiddenInPwa)) {
             return redirect()->route('login', ['source' => 'pwa']);
         }
 

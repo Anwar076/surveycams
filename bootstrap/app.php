@@ -17,11 +17,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'employee' => \App\Http\Middleware\EmployeeMiddleware::class,
             'pwa' => \App\Http\Middleware\RedirectPwaToLogin::class,
         ]);
-        
-        // Apply globally to web routes
-        $middleware->web(append: [
-            \App\Http\Middleware\RedirectPwaToLogin::class,
-        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
