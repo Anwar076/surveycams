@@ -411,6 +411,21 @@
                 });
             });
         });
+        // Check if app is installed as PWA and redirect to login
+        function checkPwaAndRedirect() {
+            if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+                window.location.href = '/login?source=pwa';
+                return;
+            }
+            if (window.navigator.standalone === true) {
+                window.location.href = '/login?source=pwa';
+                return;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkPwaAndRedirect();
+        });
     </script>
 </body>
 </html>

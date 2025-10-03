@@ -9,67 +9,67 @@ use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardContro
 use App\Http\Controllers\Employee\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function (Illuminate\Http\Request $request) {
+Route::get('/', function () {
     // Always show welcome page for web browsers
     return view('welcome');
-})->name('welcome')->middleware('pwa');
+})->name('welcome');
 
 // Public pages (only for web browsers)
 Route::get('/features', function () {
     return view('features');
-})->name('features')->middleware('pwa');
+})->name('features');
 
 Route::get('/pricing', function () {
     return view('pricing');
-})->name('pricing')->middleware('pwa');
+})->name('pricing');
 
 Route::get('/about', function () {
     return view('about');
-})->name('about')->middleware('pwa');
+})->name('about');
 
 Route::get('/contact', function () {
     return view('contact');
-})->name('contact')->middleware('pwa');
+})->name('contact');
 
 Route::get('/help', function () {
     return view('help');
-})->name('help')->middleware('pwa');
+})->name('help');
 
 Route::get('/privacy', function () {
     return view('privacy');
-})->name('privacy')->middleware('pwa');
+})->name('privacy');
 
 Route::get('/terms', function () {
     return view('terms');
-})->name('terms')->middleware('pwa');
+})->name('terms');
 
 Route::get('/status', function () {
     return view('status');
-})->name('status')->middleware('pwa');
+})->name('status');
 
 Route::get('/security', function () {
     return view('security');
-})->name('security')->middleware('pwa');
+})->name('security');
 
 Route::get('/api', function () {
     return view('api');
-})->name('api')->middleware('pwa');
+})->name('api');
 
 Route::get('/integrations', function () {
     return view('integrations');
-})->name('integrations')->middleware('pwa');
+})->name('integrations');
 
 Route::get('/blog', function () {
     return view('blog');
-})->name('blog')->middleware('pwa');
+})->name('blog');
 
 Route::get('/careers', function () {
     return view('careers');
-})->name('careers')->middleware('pwa');
+})->name('careers');
 
 Route::get('/documentation', function () {
     return view('documentation');
-})->name('documentation')->middleware('pwa');
+})->name('documentation');
 
 // Redirect dashboard based on user role
 Route::get('/dashboard', function () {

@@ -645,8 +645,27 @@
             window.requestAnimationFrame(step);
         }
 
+        // Check if app is installed as PWA and redirect to login
+        function checkPwaAndRedirect() {
+            // Check if running in standalone mode (installed PWA)
+            if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('PWA detected, redirecting to login');
+                window.location.href = '/login?source=pwa';
+                return;
+            }
+            
+            // Check for iOS PWA
+            if (window.navigator.standalone === true) {
+                console.log('iOS PWA detected, redirecting to login');
+                window.location.href = '/login?source=pwa';
+                return;
+            }
+        }
+
         // Start animations when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            // Check PWA first
+            checkPwaAndRedirect();
             setTimeout(() => {
                 animateNumber(document.getElementById('live-users'), 0, 1247, 2000);
                 animateNumber(document.getElementById('live-tasks'), 0, 15892, 2500);
