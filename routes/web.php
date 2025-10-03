@@ -9,11 +9,23 @@ use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardContro
 use App\Http\Controllers\Employee\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+Route::get('/', function (Illuminate\Http\Request $request) {
+    // Check if request is from PWA
+    $isPwa = $request->query('source') === 'pwa' || 
+             $request->header('User-Agent') && str_contains($request->header('User-Agent'), 'wv') ||
+             $request->header('X-PWABuilder-Rewrite') ||
+             request()->headers->get('sec-fetch-dest') === 'empty';
+    
+    // If coming from PWA, redirect to login
+    if ($isPwa) {
+        return redirect()->route('login');
+    }
+    
+    // Otherwise show welcome page for web browsers
     return view('welcome');
 })->name('welcome');
 
-// Public pages
+// Public pages (only for web browsers)
 Route::get('/features', function () {
     return view('features');
 })->name('features');

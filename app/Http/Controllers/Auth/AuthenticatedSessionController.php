@@ -28,6 +28,25 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Check if request is from PWA
+        $isPwa = $request->query('source') === 'pwa' || 
+                 $request->header('User-Agent') && str_contains($request->header('User-Agent'), 'wv') ||
+                 $request->header('X-PWABuilder-Rewrite') ||
+                 request()->headers->get('sec-fetch-dest') === 'empty';
+
+        // Redirect based on user role
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->role === 'employee') {
+            return redirect()->route('employee.dashboard');
+        }
+
+        // If from PWA, redirect to appropriate dashboard, otherwise to generic dashboard
+        if ($isPwa) {
+            return redirect()->route('dashboard', ['source' => 'pwa']);
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
@@ -41,6 +60,16 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
+
+        // Check if request is from PWA and redirect to login with PWA source
+        $isPwa = $request->query('source') === 'pwa' || 
+                 $request->header('User-Agent') && str_contains($request->header('User-Agent'), 'wv') ||
+                 $request->header('X-PWABuilder-Rewrite') ||
+                 request()->headers->get('sec-fetch-dest') === 'empty';
+
+        if ($isPwa) {
+            return redirect()->route('login', ['source' => 'pwa']);
+        }
 
         return redirect('/');
     }

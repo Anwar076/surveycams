@@ -2,7 +2,7 @@
   "name": "TaskCheck - Task Management System",
   "short_name": "TaskCheck",
   "description": "Professional task management and team collaboration platform",
-  "start_url": "/?source=pwa",
+  "start_url": "/login?source=pwa",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
   "id": "/",

@@ -1,6 +1,5 @@
 const CACHE_NAME = 'taskcheck-v3.0.0';
 const urlsToCache = [
-  '/',
   '/login',
   '/admin/dashboard',
   '/admin/lists',
